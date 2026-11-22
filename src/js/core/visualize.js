@@ -2,7 +2,7 @@ import Lang from '../../sa11y-js/utils/lang';
 import Elements from '../../sa11y-js/utils/elements';
 import { computeAriaLabel } from '../../sa11y-js/utils/computeAccessibleName';
 import * as Utils from '../../sa11y-js/utils/utils';
-import { alignAlts } from '../utils/align';
+import { alertContainer, alignAlts } from '../utils/align';
 import { getElements } from '../utils/utils';
 import checkReadability from '../../sa11y-js/rulesets/readability';
 import sprite from '../elements/sprite.js';
@@ -378,7 +378,7 @@ export function drawResult(result, index) {
   mark.setAttribute('data-ed11y-open', 'false');
   if (!UI.inlineAlerts) {
     mark.classList.add('ed11y-editable-result');
-    UI.panelAttachTo.insertAdjacentElement('beforeend', mark);
+    alertContainer().insertAdjacentElement('beforeend', mark);
   } else {
     result.element.insertAdjacentElement(result.position, mark);
   }

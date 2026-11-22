@@ -11,6 +11,9 @@ export const defaults = {
   framePositioners: false, // Parallel array of wrapper elements outside each
   // iframe; framePositioners[i] offsets annotations for fixedRoots[i]. Use
   // false (or omit) when roots are in the main document.
+  alertAttachTo: false, // Positioned element to append alert buttons and
+  // highlights to, instead of panelAttachTo. They are positioned relative to
+  // it, so they scroll and clip with it. Tips still attach to panelAttachTo.
 
   // Exclusions
   containerIgnore: '',
@@ -80,7 +83,15 @@ export const defaults = {
   // Wait for external JS to insert results. Each external test listens for
   // `ed11yRunCustomTests`, pushes objects shaped like
   // { test, element, type, content, dismiss } onto Ed11y.State.results, then
-  // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
+  // dispatches `ed11yResume`. Echo the run ID to have late answers ignored:
+  //   document.addEventListener('ed11yRunCustomTests', (e) => {
+  //     const runId = e.detail.runId;
+  //     // ...push results, then:
+  //     document.dispatchEvent(new CustomEvent('ed11yResume', { detail: { runId } }));
+  //   });
+  // An answer whose runId is not the current run's is ignored; an answer
+  // without one is counted for the current run. Tests that miss the 1000ms
+  // deadline are dropped. Besides 'error' and 'warning', external tests
   // may push `type: 'link'` (broken link) or `type: 'linkManual'`
   // (unverifiable link); see utils/result-types.js, or hand link checker
   // results over through `brokenLinks` below instead. Any extra `data`
@@ -180,7 +191,7 @@ export const defaults = {
 
   // Shared properties for some checks
   susAltStopWords: '',
-  linkStopWords: '',
+  linkStopWords: 'follow us on', // @todo go upstream
   extraPlaceholderStopWords: '',
   imageWithinLightbox: '',
   initialHeadingLevel: [],

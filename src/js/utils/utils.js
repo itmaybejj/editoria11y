@@ -660,9 +660,15 @@ export function newIncrementalResults() {
   return changed;
 }
 
+// Reports an error without throwing, so the caller can recover. Every error
+// is logged with its original stack; the dialog is shown once per page, since
+// on an editing page the same failure can recur on every recheck.
 export function showError(error) {
+  console.error('Editoria11y:', error);
+  if (document.querySelector('sa11y-console-error')) {
+    return;
+  }
   const consoleErrors = new ConsoleErrors(error);
   document.body.appendChild(consoleErrors);
   UI.attachCSS(consoleErrors.shadowRoot);
-  throw Error(error);
 }

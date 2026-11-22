@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.3-1117
+			* @version 3.0.3-1121
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -2116,7 +2116,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.3-1117";
+const version = "3.0.3-1121";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2937,10 +2937,13 @@ function newIncrementalResults() {
   return changed;
 }
 function showError(error) {
+  console.error("Editoria11y:", error);
+  if (document.querySelector("sa11y-console-error")) {
+    return;
+  }
   const consoleErrors = new ConsoleErrors(error);
   document.body.appendChild(consoleErrors);
   UI.attachCSS(consoleErrors.shadowRoot);
-  throw Error(error);
 }
 function pushResult$1({
   test,
@@ -5523,15 +5526,58 @@ function editableFocused() {
   return false;
 }
 function toMainDocRect(rect, frame) {
+  const scale = frame.scale || 1;
   return {
-    top: rect.top + frame.top,
-    left: rect.left + frame.left,
-    bottom: rect.bottom + frame.top,
-    right: rect.right + frame.left
+    top: rect.top * scale + frame.top,
+    left: rect.left * scale + frame.left,
+    bottom: rect.bottom * scale + frame.top,
+    right: rect.right * scale + frame.left
   };
 }
-const ZERO_FRAME = { top: 0, left: 0 };
+const ZERO_FRAME = { top: 0, left: 0, scale: 1 };
 const frameFor = (fixedRoot) => fixedRoot && UI.positionedFrames[fixedRoot] ? UI.positionedFrames[fixedRoot] : ZERO_FRAME;
+function scrollBoundsFor(result) {
+  const rect = result.scrollableParent.getBoundingClientRect();
+  const frame = frameFor(result.fixedRoot);
+  if (frame === ZERO_FRAME) {
+    return rect;
+  }
+  const bounds = toMainDocRect(rect, frame);
+  if (typeof frame.bottom === "number") {
+    bounds.top = Math.max(bounds.top, frame.top);
+    bounds.left = Math.max(bounds.left, frame.left);
+    bounds.bottom = Math.min(bounds.bottom, frame.bottom);
+    bounds.right = Math.min(bounds.right, frame.right);
+  }
+  bounds.width = Math.max(0, bounds.right - bounds.left);
+  bounds.height = Math.max(0, bounds.bottom - bounds.top);
+  return bounds;
+}
+function measureFrame(positioner) {
+  const rect = positioner.getBoundingClientRect();
+  let scale = positioner.offsetWidth > 0 && rect.width > 0 ? rect.width / positioner.offsetWidth : 1;
+  if (Math.abs(scale - 1) < 5e-3) scale = 1;
+  const isFrame = positioner.tagName === "IFRAME";
+  return {
+    top: rect.top + (isFrame ? positioner.clientTop * scale : 0),
+    left: rect.left + (isFrame ? positioner.clientLeft * scale : 0),
+    right: rect.right,
+    bottom: rect.bottom,
+    scale
+  };
+}
+const alertContainer = () => State.option.alertAttachTo || UI.panelAttachTo;
+function alertOrigin() {
+  const container = State.option.alertAttachTo;
+  if (!container) {
+    return { top: -window.scrollY, left: 0 };
+  }
+  const rect = container.getBoundingClientRect();
+  return {
+    top: rect.top + container.clientTop - container.scrollTop,
+    left: rect.left + container.clientLeft - container.scrollLeft
+  };
+}
 function checkEditableIntersects(focusKnown = false) {
   if (!UI.activeRange || !focusKnown && !editableFocused()) {
     UI.jumpList?.forEach((el) => {
@@ -5565,18 +5611,18 @@ function updateFixedRootPositions() {
   UI.positionedFrames.length = 0;
   if (!Array.isArray(State.option.framePositioners)) return;
   State.option.framePositioners.forEach((positioner) => {
-    UI.positionedFrames.push(positioner ? positioner.getBoundingClientRect() : { top: 0, left: 0 });
+    UI.positionedFrames.push(positioner ? measureFrame(positioner) : { top: 0, left: 0, scale: 1 });
   });
 }
 function alignButtons() {
   if (UI.jumpList.length === 0) {
     return;
   }
-  UI.alignPending = true;
   updateFixedRootPositions();
   let previousNudgeTop = 0;
   let previousNudgeLeft = 0;
-  const scrollTop = window.scrollY;
+  const origin = UI.inlineAlerts ? { top: -window.scrollY, left: 0 } : alertOrigin();
+  const scrollTop = -origin.top;
   if (!UI.inlineAlerts) {
     for (let i = 0; i < UI.jumpList.length; i++) {
       const mark = UI.jumpList[i];
@@ -5584,19 +5630,30 @@ function alignButtons() {
         console.warn("Editoria11y debug: element disappeared");
         continue;
       }
+      const placed = typeof mark.markTop === "number" && typeof mark.markLeft === "number";
+      mark.held = false;
       if (!mark.result.element.isConnected) {
         UI.forceFullCheck = true;
         UI.interaction = true;
+        if (placed) {
+          mark.held = true;
+          continue;
+        }
         mark.style.display = "none";
       }
       let targetOffset = mark.result.element.getBoundingClientRect();
-      let top = targetOffset.top + scrollTop;
+      const frameScale = frameFor(mark.result.fixedRoot).scale || 1;
+      let top = targetOffset.top * frameScale + scrollTop;
       if (!visible(mark.result.element)) {
         const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+        if (!theFirstVisibleParent && placed) {
+          mark.held = true;
+          continue;
+        }
         targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
-        top = targetOffset.top + scrollTop;
+        top = targetOffset.top * frameScale + scrollTop;
       }
-      let left = targetOffset.left;
+      let left = targetOffset.left * frameScale;
       if (mark.result.element.tagName === "IMG") {
         top = top + 10;
         left = left + 10;
@@ -5608,7 +5665,7 @@ function alignButtons() {
         left = left + UI.positionedFrames[mark.result.fixedRoot].left;
       }
       if (mark.result.scrollableParent) {
-        UI.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+        UI.jumpList[i].bounds = scrollBoundsFor(mark.result);
         if (left < UI.jumpList[i].bounds.left) {
           left = UI.jumpList[i].bounds.left;
         } else if (left + 40 > UI.jumpList[i].bounds.right) {
@@ -5651,9 +5708,14 @@ function alignButtons() {
     });
   }
   UI.jumpList.forEach((mark, i) => {
+    if (mark.held) {
+      previousNudgeTop = mark.nudgeTop || 0;
+      previousNudgeLeft = mark.nudgeLeft || 0;
+      return;
+    }
     let nudgeTop = 10;
     let nudgeLeft = mark.result.element.tagName === "IMG" ? 10 : -34;
-    if (mark.markTop + scrollTop < 0) {
+    if (!State.option.alertAttachTo && mark.markTop + scrollTop < 0) {
       nudgeTop = -1 * (mark.markTop + scrollTop) - 6;
     }
     if (i > 0 && overlap(
@@ -5678,7 +5740,7 @@ function alignButtons() {
     let constrainLeft = 0;
     let constrainRight = window.innerWidth;
     if (mark.result.scrollableParent) {
-      const constrained = mark.result.scrollableParent.getBoundingClientRect();
+      const constrained = scrollBoundsFor(mark.result);
       constrainLeft = constrained.left;
       constrainRight = constrainLeft + constrained.width;
     } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
@@ -5696,10 +5758,11 @@ function alignButtons() {
       needNudge = true;
     }
     if (!UI.inlineAlerts) {
+      const writeLeft = mark.markLeft - origin.left;
       if (needNudge) {
-        mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
+        mark.style.transform = `translate(${writeLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
       } else {
-        mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
+        mark.style.transform = `translate(${writeLeft}px, ${mark.markTop}px)`;
       }
     } else {
       nudgeMark(mark, nudgeLeft, nudgeTop);
@@ -5711,8 +5774,12 @@ function alignButtons() {
   });
   if (!UI.inlineAlerts) {
     UI.jumpList.forEach((mark) => {
+      if (mark.held) {
+        return;
+      }
       if (mark.result.scrollableParent) {
-        if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
+        const targetTop = toMainDocRect(mark.targetOffset, frameFor(mark.result.fixedRoot)).top;
+        if (!!mark.bounds && (targetTop - mark.bounds.top < 0 || targetTop - mark.bounds.bottom > 0) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
           mark.classList.add("ed11y-offscreen");
           mark.style.transform = "translate(0px, -50px)";
           mark.style.pointerEvents = "none";
@@ -5724,7 +5791,7 @@ function alignButtons() {
           mark.style.pointerEvents = "auto";
         }
       } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
-        if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top + mark.bounds.top - mark.bounds.bottom > -10) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
+        if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top * (mark.bounds.scale || 1) + mark.bounds.top - mark.bounds.bottom > -10) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
           mark.classList.add("ed11y-offscreen");
           mark.style.transform = "translate(0px, -50px)";
           mark.style.pointerEvents = "none";
@@ -6884,7 +6951,7 @@ function drawResult(result, index) {
   mark.setAttribute("data-ed11y-open", "false");
   if (!UI.inlineAlerts) {
     mark.classList.add("ed11y-editable-result");
-    UI.panelAttachTo.insertAdjacentElement("beforeend", mark);
+    alertContainer().insertAdjacentElement("beforeend", mark);
   } else {
     result.element.insertAdjacentElement(result.position, mark);
   }
@@ -7083,11 +7150,8 @@ function updatePanel() {
       resetResults(true);
     } else {
       State.results.push(...UI.oldResults);
-      if (!UI.alignPending) {
-        alignButtons();
-        alignPanel();
-        UI.alignPending = false;
-      }
+      alignButtons();
+      alignPanel();
       UI.running = false;
       resumeObservers();
       return;
@@ -7413,11 +7477,13 @@ function positionHighlight(el, target, result) {
     const visibleParent = firstVisibleParent(target);
     if (visibleParent) targetOffset = visibleParent.getBoundingClientRect();
   }
-  const framePositioner = result.fixedRoot != null && UI.positionedFrames[result.fixedRoot] ? UI.positionedFrames[result.fixedRoot] : { top: 0, left: 0 };
-  el.style.setProperty("width", `${targetOffset.width + 6}px`);
-  el.style.setProperty("height", `${targetOffset.height + 6}px`);
-  el.style.setProperty("top", `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`);
-  el.style.setProperty("left", `${targetOffset.left + framePositioner.left - 3}px`);
+  const frame = frameFor(result.fixedRoot);
+  const scale = frame.scale || 1;
+  const origin = alertOrigin();
+  el.style.setProperty("width", `${targetOffset.width * scale + 6}px`);
+  el.style.setProperty("height", `${targetOffset.height * scale + 6}px`);
+  el.style.setProperty("top", `${targetOffset.top * scale + frame.top - origin.top - 3}px`);
+  el.style.setProperty("left", `${targetOffset.left * scale + frame.left - origin.left - 3}px`);
 }
 function editableHighlighter(resultID, show, firstVisible) {
   const result = State.results[resultID];
@@ -7436,7 +7502,7 @@ function editableHighlighter(resultID, show, firstVisible) {
     el.classList.add("ed11y-element");
     el.style.setProperty("position", "absolute");
     el.style.setProperty("pointer-events", "none");
-    UI.panelAttachTo.appendChild(el);
+    alertContainer().appendChild(el);
     entry.highlight = el;
   }
   entry.highlightTarget = firstVisible || result.element;
@@ -7640,13 +7706,17 @@ function incrementalAlign() {
   alignRafPending = true;
   requestAnimationFrame(() => {
     alignRafPending = false;
-    if (UI.running || UI.alignPending) {
+    if (UI.running) {
       incrementalAlign();
       return;
     }
     UI.scrollPending++;
     updateTipLocations();
   });
+}
+function realign() {
+  UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
+  requestAnimationFrame(() => updateTipLocations());
 }
 function alignTip(button, toolTip, recheck = 0, reveal = false) {
   if (!toolTip) {
@@ -7694,13 +7764,14 @@ function alignTip(button, toolTip, recheck = 0, reveal = false) {
   let containBottom = window.innerHeight + scrollTop;
   let absoluteBottom = containBottom;
   if (!UI.inlineAlerts && result.scrollableParent) {
-    const bounds = result.scrollableParent.getBoundingClientRect();
+    updateFixedRootPositions();
+    const bounds = scrollBoundsFor(result);
     if (bounds.width > 0) {
       containLeft = Math.max(0, bounds.left);
       containWidth = Math.min(containWidth, bounds.width - 30);
       containBottom = bounds.bottom + scrollTop;
       containTop = bounds.top + scrollTop;
-      absoluteBottom = bounds.top + result.scrollableParent.scrollHeight;
+      absoluteBottom = bounds.top + result.scrollableParent.scrollHeight * (frameFor(result.fixedRoot).scale || 1);
     }
   } else if (mark.dataset.ed11yHiddenResult === "true" || !(visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
     const theFirstVisibleParent = firstVisibleParent(mark.result.element);
@@ -8070,6 +8141,13 @@ function startObserver(root) {
     updateTipLocations();
   }, 1e3);
 }
+function failRun(error) {
+  showError(error);
+  UI.running = false;
+  UI.incrementalRetryPending = false;
+  UI.forceFullCheck = true;
+  resumeObservers();
+}
 const safeRun = (fn, name) => {
   const start = performance.now();
   try {
@@ -8112,7 +8190,11 @@ const enqueueTests = (queue) => {
     } else {
       window.setTimeout(
         (queue2) => {
-          enqueueTests(queue2);
+          try {
+            enqueueTests(queue2);
+          } catch (error) {
+            failRun(error);
+          }
         },
         0,
         queue
@@ -8132,17 +8214,34 @@ function removeCustomTest() {
     continueCheck().then();
   }
   if (State.option.customTests === 0) {
-    document.removeEventListener("ed11yResume", () => {
-      UI.customTestsRemaining--;
-      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
-        continueCheck().then();
-      }
-    });
+    document.removeEventListener("ed11yResume", onCustomTestResume);
+  }
+}
+function onCustomTestResume(event) {
+  const runId = event?.detail?.runId;
+  if (runId !== void 0 && runId !== null && Number(runId) !== UI.runGen) {
+    return;
+  }
+  if (UI.customTestsRemaining <= 0) {
+    return;
+  }
+  UI.customTestsRemaining--;
+  if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+    continueCheck().then();
   }
 }
 UI.testsRemaining = 0;
 function checkAll() {
+  try {
+    return startRun();
+  } catch (error) {
+    failRun(error);
+    return false;
+  }
+}
+function startRun() {
   if (UI.tipOpen) {
+    UI.running = false;
     return false;
   }
   resetCaches();
@@ -8196,7 +8295,9 @@ function checkAll() {
   UI.testsRemaining = queue.length;
   if (State.option.customTests > 0) {
     UI.customTestsRemaining = State.option.customTests;
-    const customTests = new CustomEvent("ed11yRunCustomTests");
+    const customTests = new CustomEvent("ed11yRunCustomTests", {
+      detail: { runId: UI.runGen }
+    });
     document.dispatchEvent(customTests);
     window.clearTimeout(UI.customTestTimeout);
     const customTestRace = performance.now();
@@ -8215,6 +8316,15 @@ function checkAll() {
 }
 async function continueCheck() {
   const runGenAtDispatch = UI.runGen;
+  try {
+    await finishRun(runGenAtDispatch);
+  } catch (error) {
+    if (UI.runGen === runGenAtDispatch) {
+      failRun(error);
+    }
+  }
+}
+async function finishRun(runGenAtDispatch) {
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
   } else {
@@ -10304,6 +10414,10 @@ const defaults = {
   // Parallel array of wrapper elements outside each
   // iframe; framePositioners[i] offsets annotations for fixedRoots[i]. Use
   // false (or omit) when roots are in the main document.
+  alertAttachTo: false,
+  // Positioned element to append alert buttons and
+  // highlights to, instead of panelAttachTo. They are positioned relative to
+  // it, so they scroll and clip with it. Tips still attach to panelAttachTo.
   // Exclusions
   containerIgnore: "",
   contrastIgnore: ".sr-only",
@@ -10365,7 +10479,15 @@ const defaults = {
   // Wait for external JS to insert results. Each external test listens for
   // `ed11yRunCustomTests`, pushes objects shaped like
   // { test, element, type, content, dismiss } onto Ed11y.State.results, then
-  // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
+  // dispatches `ed11yResume`. Echo the run ID to have late answers ignored:
+  //   document.addEventListener('ed11yRunCustomTests', (e) => {
+  //     const runId = e.detail.runId;
+  //     // ...push results, then:
+  //     document.dispatchEvent(new CustomEvent('ed11yResume', { detail: { runId } }));
+  //   });
+  // An answer whose runId is not the current run's is ignored; an answer
+  // without one is counted for the current run. Tests that miss the 1000ms
+  // deadline are dropped. Besides 'error' and 'warning', external tests
   // may push `type: 'link'` (broken link) or `type: 'linkManual'`
   // (unverifiable link); see utils/result-types.js, or hand link checker
   // results over through `brokenLinks` below instead. Any extra `data`
@@ -10467,7 +10589,8 @@ const defaults = {
   // e.g. '.inner-node-hidden-in-CSS'
   // Shared properties for some checks
   susAltStopWords: "",
-  linkStopWords: "",
+  linkStopWords: "follow us on",
+  // @todo go upstream
   extraPlaceholderStopWords: "",
   imageWithinLightbox: "",
   initialHeadingLevel: [],
@@ -11128,12 +11251,7 @@ async function initialize(userOptions) {
       return false;
     }
     UI.running = true;
-    document.addEventListener("ed11yResume", () => {
-      UI.customTestsRemaining--;
-      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
-        continueCheck().then();
-      }
-    });
+    document.addEventListener("ed11yResume", onCustomTestResume);
     checkAll();
     attachIntegrationListeners(document);
     if (Array.isArray(State.option.fixedRoots)) {
@@ -11197,6 +11315,7 @@ export {
   elements,
   findElements,
   getElements,
+  realign,
   refresh,
   reset,
   sanitizeHTML,

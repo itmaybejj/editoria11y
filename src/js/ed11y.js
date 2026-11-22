@@ -1,7 +1,7 @@
 import Lang from '../sa11y-js/utils/lang';
 import { computeAccessibleName } from '../sa11y-js/utils/computeAccessibleName.js';
 import Elements from '../sa11y-js/utils/elements.js';
-import { reset, refresh, setFixedRoots } from './core/run.js';
+import { realign, reset, refresh, setFixedRoots } from './core/run.js';
 import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
@@ -40,6 +40,7 @@ export {
   createDismissalKey,
   findElements, // Adds elements to the Elements.Found object.
   getElements, // Directly returns elements.
+  realign, // Reposition alerts after a layout change the library can't see.
   refresh,
   reset,
   sanitizeHTML,

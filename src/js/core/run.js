@@ -26,12 +26,16 @@ import checkDeveloper from '../../sa11y-js/rulesets/developer';
 import Lang from '../../sa11y-js/utils/lang.js';
 import Elements from '../../sa11y-js/utils/elements.js';
 import {
+  alertContainer,
+  alertOrigin,
   alignAlts,
   alignButtons,
   alignPanel,
   checkEditableIntersects,
   closestScrollable,
   focusLoop,
+  frameFor,
+  scrollBoundsFor,
   updateFixedRootPositions,
 } from '../utils/align.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
@@ -115,11 +119,8 @@ export function updatePanel() {
     } else {
       // Reconnect map
       State.results.push(...UI.oldResults);
-      if (!UI.alignPending) {
-        alignButtons();
-        alignPanel();
-        UI.alignPending = false;
-      }
+      alignButtons();
+      alignPanel();
       UI.running = false;
       resumeObservers();
       return;
@@ -548,14 +549,13 @@ function positionHighlight(el, target, result) {
     const visibleParent = firstVisibleParent(target);
     if (visibleParent) targetOffset = visibleParent.getBoundingClientRect();
   }
-  const framePositioner =
-    result.fixedRoot != null && UI.positionedFrames[result.fixedRoot]
-      ? UI.positionedFrames[result.fixedRoot]
-      : { top: 0, left: 0 };
-  el.style.setProperty('width', `${targetOffset.width + 6}px`);
-  el.style.setProperty('height', `${targetOffset.height + 6}px`);
-  el.style.setProperty('top', `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`);
-  el.style.setProperty('left', `${targetOffset.left + framePositioner.left - 3}px`);
+  const frame = frameFor(result.fixedRoot);
+  const scale = frame.scale || 1;
+  const origin = alertOrigin();
+  el.style.setProperty('width', `${targetOffset.width * scale + 6}px`);
+  el.style.setProperty('height', `${targetOffset.height * scale + 6}px`);
+  el.style.setProperty('top', `${targetOffset.top * scale + frame.top - origin.top - 3}px`);
+  el.style.setProperty('left', `${targetOffset.left * scale + frame.left - origin.left - 3}px`);
 }
 
 export function editableHighlighter(resultID, show, firstVisible) {
@@ -585,7 +585,7 @@ export function editableHighlighter(resultID, show, firstVisible) {
     el.classList.add('ed11y-element');
     el.style.setProperty('position', 'absolute');
     el.style.setProperty('pointer-events', 'none');
-    UI.panelAttachTo.appendChild(el);
+    alertContainer().appendChild(el);
     entry.highlight = el;
   }
 
@@ -833,20 +833,31 @@ export function jumpTo(next = true) {
 // frame collapse to a single realign on the next paint; if a check run is
 // in flight we defer to the following frame rather than racing layout.
 // Replaces a setTimeout-based lagBounce — align is rendering work, so
-// RAF is the right scheduling primitive.
+// RAF is the right scheduling primitive. The retry only spins while a run
+// is in flight; every run clears UI.running when it finishes.
 let alignRafPending = false;
 export function incrementalAlign() {
   if (alignRafPending) return;
   alignRafPending = true;
   requestAnimationFrame(() => {
     alignRafPending = false;
-    if (UI.running || UI.alignPending) {
+    if (UI.running) {
       incrementalAlign();
       return;
     }
     UI.scrollPending++;
     updateTipLocations();
   });
+}
+
+// Public: reposition alerts, highlights and any open tip on the next frame.
+// For integrations whose layout moves without a scroll or resize event the
+// library can see — e.g. a transform-based zoom on a framePositioner, or a
+// scrolling ancestor of it.
+export function realign() {
+  // Same path as a watched container scrolling; coalesces repeat calls.
+  UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
+  requestAnimationFrame(() => updateTipLocations());
 }
 
 export function alignTip(button, toolTip, recheck = 0, reveal = false) {
@@ -911,14 +922,17 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   let absoluteBottom = containBottom;
 
   if (!UI.inlineAlerts && result.scrollableParent) {
-    const bounds = result.scrollableParent.getBoundingClientRect();
+    // In main-document coordinates, like the button the tip hangs from.
+    updateFixedRootPositions();
+    const bounds = scrollBoundsFor(result);
     if (bounds.width > 0) {
       //buttonTop = buttonTop + result.scrollableParent.scrollTop;
       containLeft = Math.max(0, bounds.left);
       containWidth = Math.min(containWidth, bounds.width - 30);
       containBottom = bounds.bottom + scrollTop;
       containTop = bounds.top + scrollTop;
-      absoluteBottom = bounds.top + result.scrollableParent.scrollHeight;
+      absoluteBottom =
+        bounds.top + result.scrollableParent.scrollHeight * (frameFor(result.fixedRoot).scale || 1);
     }
   } else if (
     mark.dataset.ed11yHiddenResult === 'true' ||
@@ -1100,8 +1114,6 @@ export function alignHighlights() {
 }
 
 export const slowIncremental = lagBounce(() => {
-  //incrementalAlign(); // Immediately realign tips.
-  //UI.alignPending = false;
   UI.interaction = true;
   incrementalCheckDebounce();
 }, 500);
@@ -1404,8 +1416,22 @@ export function startObserver(root) {
   }, 1000);
 }
 
-// Runs one ruleset and records its time in UI.runTimings. The names are passed explicitly
-// because the minified build renames functions.
+// Ends a check run that threw outside a ruleset. Every run sets UI.running and
+// pauses observers, and only a run that finishes undoes them; without this a
+// failure froze Editoria11y until reload: no rechecks, an inert panel toggle,
+// and incrementalAlign retrying every frame.
+function failRun(error) {
+  showError(error);
+  UI.running = false;
+  UI.incrementalRetryPending = false;
+  // Results and marks may be half-updated; rebuild them on the next run.
+  UI.forceFullCheck = true;
+  resumeObservers();
+}
+
+// Runs one ruleset and records its time in UI.runTimings. A ruleset that throws
+// is reported and skipped; the run continues with the others. The names are
+// passed explicitly because the minified build renames functions.
 const safeRun = (fn, name) => {
   const start = performance.now();
   try {
@@ -1449,7 +1475,12 @@ const enqueueTests = (queue) => {
     } else {
       window.setTimeout(
         (queue) => {
-          enqueueTests(queue);
+          // Off checkAll's stack, so its catch no longer covers us.
+          try {
+            enqueueTests(queue);
+          } catch (error) {
+            failRun(error);
+          }
         },
         0,
         queue,
@@ -1470,19 +1501,48 @@ function removeCustomTest() {
     continueCheck(true).then();
   }
   if (State.option.customTests === 0) {
-    document.removeEventListener('ed11yResume', () => {
-      UI.customTestsRemaining--;
-      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
-        continueCheck(true).then();
-      }
-    });
+    document.removeEventListener('ed11yResume', onCustomTestResume);
+  }
+}
+
+// A custom test has pushed its results. Two kinds of answer are ignored:
+// - one for another run, recognised by an echoed `detail.runId` that does not
+//   match the run that dispatched ed11yRunCustomTests. Counting it would let
+//   this run paint before its own tests finish. Answers without a runId
+//   (integrations written before run IDs) cannot be told apart and still count.
+// - one nobody is waiting for, e.g. from a test dropped by removeCustomTest
+//   that finishes anyway. Counting it took customTestsRemaining below zero,
+//   and every later run then waited for it to reach zero forever.
+export function onCustomTestResume(event) {
+  const runId = event?.detail?.runId;
+  if (runId !== undefined && runId !== null && Number(runId) !== UI.runGen) {
+    return;
+  }
+  if (UI.customTestsRemaining <= 0) {
+    return;
+  }
+  UI.customTestsRemaining--;
+  if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+    continueCheck(true).then();
   }
 }
 
 UI.testsRemaining = 0;
-// Toggles the outline of all headers, link texts, and images.
+// Starts a check run. Callers set UI.running first; the run clears it when it
+// finishes, or failRun does if any step throws.
 export function checkAll() {
+  try {
+    return startRun();
+  } catch (error) {
+    failRun(error);
+    return false;
+  }
+}
+
+function startRun() {
   if (UI.tipOpen) {
+    // Nothing ran, so nothing else will clear the caller's flag.
+    UI.running = false;
     return false;
   }
   // Sa11y's caches only hold for one run: they store results for ancestors as well as for the
@@ -1560,7 +1620,11 @@ export function checkAll() {
   if (State.option.customTests > 0) {
     // Pause
     UI.customTestsRemaining = State.option.customTests;
-    const customTests = new CustomEvent('ed11yRunCustomTests');
+    // Tests may echo runId on ed11yResume so a late answer for an earlier run
+    // is not counted toward this one; see onCustomTestResume.
+    const customTests = new CustomEvent('ed11yRunCustomTests', {
+      detail: { runId: UI.runGen },
+    });
     document.dispatchEvent(customTests);
     window.clearTimeout(UI.customTestTimeout);
     const customTestRace = performance.now();
@@ -1579,11 +1643,25 @@ export function checkAll() {
   enqueueTests(queue);
 }
 
+// Filters, counts and paints the results of a run once every ruleset is done.
+// Called asynchronously (queued rulesets, custom tests), so it handles its own
+// failures rather than rejecting into callers that do not wait for it.
 export async function continueCheck() {
-  // Capture the generation we started dispatching under. If a newer checkAll
-  // has bumped UI.runGen while we were awaiting async work, the results in
-  // State are about to be discarded anyway — bail before painting.
   const runGenAtDispatch = UI.runGen;
+  try {
+    await finishRun(runGenAtDispatch);
+  } catch (error) {
+    // A newer run owns UI.running now; leave it to finish.
+    if (UI.runGen === runGenAtDispatch) {
+      failRun(error);
+    }
+  }
+}
+
+async function finishRun(runGenAtDispatch) {
+  // If a newer checkAll has bumped UI.runGen while we were awaiting async
+  // work, the results in State are about to be discarded anyway — bail
+  // before painting.
   // Filter split configuration results.
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();

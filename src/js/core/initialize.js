@@ -2,7 +2,7 @@ import Constants from '../../sa11y-js/utils/constants.js';
 import Lang from '../../sa11y-js/utils/lang.js';
 import { documentLoadingCheck, store } from '../../sa11y-js/utils/utils.js';
 import { checkRunPrevent, rebuildExclusions, smush } from '../utils/utils.js';
-import { attachIntegrationListeners, checkAll, continueCheck, windowResize } from './run.js';
+import { attachIntegrationListeners, checkAll, onCustomTestResume, windowResize } from './run.js';
 import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
 import { Ed11yElementHeadingLabel, Ed11yElementPanel } from '../elements/ed11y-element-panel.js';
@@ -206,12 +206,7 @@ export async function initialize(userOptions) {
 
     UI.running = true;
 
-    document.addEventListener('ed11yResume', () => {
-      UI.customTestsRemaining--;
-      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
-        continueCheck(true).then();
-      }
-    });
+    document.addEventListener('ed11yResume', onCustomTestResume);
 
     // Run tests
     checkAll();
