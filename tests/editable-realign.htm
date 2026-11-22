@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" media="all" href="../dist/css/editoria11y.css">
+    <title>Editable Realign Fixture</title>
+</head>
+
+<body>
+    <main>
+        <h1>Editable realign fixture</h1>
+        <!-- Offline fixture for e2e/tests/realign.spec.js: typing in the
+             editable region must move result buttons along with their targets. -->
+        <section id="editable-region" contenteditable="true">
+            <p id="typing-target">Type here to push the content below down the page.</p>
+            <p>A paragraph with a link that says <a href="#somewhere">click here</a>.</p>
+            <h4>A heading that skips a level</h4>
+        </section>
+    </main>
+    <script src="../dist/js/ed11y.umd.js"></script>
+    <script src="../dist/js/lang/en.umd.js"></script>
+    <script>
+        onload = () => {
+            // ?customTests=n: tests register their custom-test listeners with addInitScript.
+            const customTests = Number(new URLSearchParams(location.search).get('customTests')) || 0;
+            new Ed11y.Ed11y({
+                customTests,
+                lang: Ed11yLangEn.lang,
+                alertMode: 'assertive',
+                inlineAlerts: false,
+                checks: { HEADING_FIRST: false },
+            });
+        };
+    </script>
+</body>
+
+</html>

@@ -2,6 +2,62 @@ import { firstVisibleParent, visible } from './utils.js';
 import Elements from '../../sa11y-js/utils/elements.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
+import { incrementalCheckDebounce } from '../core/run.js';
+
+// How long a result button whose target cannot be measured keeps its last
+// position before it is hidden. Covers the recheck that usually replaces the
+// target (debounce, rulesets, custom tests) without letting a button linger
+// over content it no longer belongs to.
+const HOLD_MS = 1000;
+let holdTimer = 0;
+
+// Keep a mark where it is: not clickable, since its target is gone or
+// unmeasurable, and hidden once it has been held for HOLD_MS. Returns true the
+// first time a mark is held, when a recheck should be asked for.
+function holdMark(mark, now) {
+  mark.held = true;
+  const first = mark.heldSince === undefined;
+  if (first) {
+    mark.heldSince = now;
+  }
+  mark.holdExpired = now - mark.heldSince >= HOLD_MS;
+  return first;
+}
+
+// Re-run alignButtons when the longest-waiting hold expires, so held marks
+// are hidden even if nothing else moves on the page.
+function scheduleHoldExpiry() {
+  if (holdTimer) {
+    return;
+  }
+  holdTimer = window.setTimeout(() => {
+    holdTimer = 0;
+    if (!UI.showPanel || !UI.jumpList?.length) {
+      return;
+    }
+    if (UI.running) {
+      // The run ends by realigning; check again after it.
+      scheduleHoldExpiry();
+      return;
+    }
+    alignButtons();
+  }, HOLD_MS);
+}
+
+// Visually hide a mark, as when its target has left its scroll zone.
+function hideMark(mark) {
+  mark.classList.add('ed11y-offscreen');
+  mark.style.transform = 'translate(0px, -50px)';
+  mark.style.pointerEvents = 'none';
+  if (mark.getAttribute('data-ed11y-open') === 'true') {
+    mark.setAttribute('data-ed11y-action', 'shut');
+  }
+}
+
+function showMark(mark) {
+  mark.classList.remove('ed11y-offscreen');
+  mark.style.pointerEvents = 'auto';
+}
 
 export const intersect = (a, b, x = 10) => {
   // Compute intersect using browser offsets.
@@ -174,19 +230,143 @@ function editableFocused() {
   return false;
 }
 
-// Offset an iframe-relative rect into main-document coordinates by its frame.
+// Convert an iframe-relative rect into main-document viewport coordinates:
+// scale it by the frame's zoom, then offset it by the frame's position.
 function toMainDocRect(rect, frame) {
+  const scale = frame.scale || 1;
   return {
-    top: rect.top + frame.top,
-    left: rect.left + frame.left,
-    bottom: rect.bottom + frame.top,
-    right: rect.right + frame.left,
+    top: rect.top * scale + frame.top,
+    left: rect.left * scale + frame.left,
+    bottom: rect.bottom * scale + frame.top,
+    right: rect.right * scale + frame.left,
   };
 }
 
-const ZERO_FRAME = { top: 0, left: 0 };
-const frameFor = (fixedRoot) =>
+const ZERO_FRAME = { top: 0, left: 0, scale: 1 };
+export const frameFor = (fixedRoot) =>
   fixedRoot && UI.positionedFrames[fixedRoot] ? UI.positionedFrames[fixedRoot] : ZERO_FRAME;
+
+// The rect of a result's scrollable parent in main-document viewport
+// coordinates. A scrollable parent inside a frame reports its rect in the
+// frame's own coordinates, which cannot be compared with alert positions.
+// Callers must have run updateFixedRootPositions() first.
+export function scrollBoundsFor(result) {
+  const rect = result.scrollableParent.getBoundingClientRect();
+  const frame = frameFor(result.fixedRoot);
+  if (frame === ZERO_FRAME) {
+    return rect;
+  }
+  const bounds = toMainDocRect(rect, frame);
+  // Nothing inside a frame shows beyond the frame's own edges, so a scroll
+  // zone taller than a scrolling frame must not keep alerts visible there.
+  if (typeof frame.bottom === 'number') {
+    bounds.top = Math.max(bounds.top, frame.top);
+    bounds.left = Math.max(bounds.left, frame.left);
+    bounds.bottom = Math.min(bounds.bottom, frame.bottom);
+    bounds.right = Math.min(bounds.right, frame.right);
+  }
+  bounds.width = Math.max(0, bounds.right - bounds.left);
+  bounds.height = Math.max(0, bounds.bottom - bounds.top);
+  return bounds;
+}
+
+// Measure a frame positioner: where its content box starts in the viewport,
+// and how much its content is scaled. A positioner under a CSS transform
+// (e.g. a zoomed page-builder preview) paints at rect.width / offsetWidth of
+// the size its inner document reports, so in-frame rects must be multiplied
+// by that ratio before they are offset.
+function measureFrame(positioner) {
+  const rect = positioner.getBoundingClientRect();
+  let scale =
+    positioner.offsetWidth > 0 && rect.width > 0 ? rect.width / positioner.offsetWidth : 1;
+  // offsetWidth is rounded to an integer; ignore sub-pixel noise.
+  if (Math.abs(scale - 1) < 0.005) scale = 1;
+  // An iframe's document starts inside its border. Other wrappers are only
+  // used for their outer position, as before.
+  const isFrame = positioner.tagName === 'IFRAME';
+  return {
+    top: rect.top + (isFrame ? positioner.clientTop * scale : 0),
+    left: rect.left + (isFrame ? positioner.clientLeft * scale : 0),
+    right: rect.right,
+    bottom: rect.bottom,
+    scale,
+  };
+}
+
+// Resolves the alertAttachTo option, an element or a selector for one, to the
+// element; false means alerts go to panelAttachTo. Anything unusable is
+// reported and ignored rather than left to throw on every run.
+export function resolveAlertAttachTo(value) {
+  if (!value) {
+    return false;
+  }
+  let container = value;
+  if (typeof value === 'string') {
+    try {
+      container = document.querySelector(value);
+    } catch {
+      container = null;
+    }
+  }
+  // nodeType rather than instanceof, which fails for elements of other frames.
+  if (container?.nodeType !== 1) {
+    console.warn(
+      typeof value === 'string'
+        ? `Editoria11y: alertAttachTo "${value}" matches no element; alerts attach to panelAttachTo instead.`
+        : 'Editoria11y: alertAttachTo is not an element; alerts attach to panelAttachTo instead.',
+    );
+    return false;
+  }
+  if (container.isConnected && getComputedStyle(container).position === 'static') {
+    // Alerts are absolutely positioned; from a static container they would be
+    // placed from some other ancestor.
+    console.warn(
+      'Editoria11y: the alertAttachTo container is not positioned. Give it position: relative (or any value but static), or alerts will be misplaced.',
+    );
+  }
+  return container;
+}
+
+// The alertAttachTo container while it is on the page, else null. A page
+// builder may re-render and drop it; alerts then fall back to panelAttachTo
+// until Ed11y.setAlertAttachTo() is given a new one.
+let warnedDetached = false;
+function alertAttachTarget() {
+  const container = State.option.alertAttachTo;
+  if (!container) {
+    return null;
+  }
+  if (container.isConnected) {
+    warnedDetached = false;
+    return container;
+  }
+  if (!warnedDetached) {
+    warnedDetached = true;
+    console.warn(
+      'Editoria11y: the alertAttachTo container was removed from the page; alerts attach to panelAttachTo until Ed11y.setAlertAttachTo() is given a new one.',
+    );
+  }
+  return null;
+}
+
+// Element that alert buttons and highlights are appended to.
+export const alertContainer = () => alertAttachTarget() || UI.panelAttachTo;
+
+// Viewport position of the point that alerts are positioned from. By default
+// alerts sit in the body, in document coordinates. With `alertAttachTo` they
+// are positioned from that container's padding box, so they scroll and clip
+// with it.
+export function alertOrigin() {
+  const container = alertAttachTarget();
+  if (!container) {
+    return { top: -window.scrollY, left: 0 };
+  }
+  const rect = container.getBoundingClientRect();
+  return {
+    top: rect.top + container.clientTop - container.scrollTop,
+    left: rect.left + container.clientLeft - container.scrollLeft,
+  };
+}
 
 /**
  * Hide tips that are in front of text currently being edited.
@@ -248,7 +428,7 @@ export function updateFixedRootPositions() {
   State.option.framePositioners.forEach((positioner) => {
     // Push a zero offset for roots without a frame rather than skipping, so the
     // array stays aligned with fixedRoots / data-ed11y-root indices.
-    UI.positionedFrames.push(positioner ? positioner.getBoundingClientRect() : { top: 0, left: 0 });
+    UI.positionedFrames.push(positioner ? measureFrame(positioner) : { top: 0, left: 0, scale: 1 });
   });
 }
 
@@ -256,7 +436,6 @@ export function alignButtons() {
   if (UI.jumpList.length === 0) {
     return;
   }
-  UI.alignPending = true;
 
   // Reading and writing in a loop creates paint thrashing.
   // We iterate the array for reads, then iterate for writes.
@@ -266,7 +445,19 @@ export function alignButtons() {
   // Used for crude intersection detection.
   let previousNudgeTop = 0;
   let previousNudgeLeft = 0;
-  const scrollTop = window.scrollY;
+  // Positions are computed in viewport coordinates, then written relative to
+  // the alert container's origin (the document, unless alertAttachTo is set).
+  const attachedTo = UI.inlineAlerts ? null : alertAttachTarget();
+  const origin = UI.inlineAlerts ? { top: -window.scrollY, left: 0 } : alertOrigin();
+  const scrollTop = -origin.top;
+  const now = performance.now();
+  // A held mark that has yet to expire; see scheduleHoldExpiry.
+  let holding = false;
+  let needsRecheck = false;
+  UI.jumpList.forEach((mark) => {
+    // Held marks sit out the nudge and clipping passes below as well.
+    mark.held = false;
+  });
   if (!UI.inlineAlerts) {
     // Compute based on target position.
 
@@ -277,27 +468,51 @@ export function alignButtons() {
         console.warn('Editoria11y debug: element disappeared');
         continue;
       }
+      if (!mark.isConnected) {
+        // Removed along with its alertAttachTo container. A recheck cannot
+        // adopt a detached button, so it draws a new one where alerts go now.
+        needsRecheck = true;
+      }
+      // A target that cannot be measured (removed, or in a document that is
+      // hidden as a whole, like a frame being swapped out) is usually about
+      // to be replaced by a recheck. A mark that already has a position keeps
+      // it until then, since moving or hiding it now would only flicker; see
+      // holdMark for how long.
+      const placed = typeof mark.markTop === 'number' && typeof mark.markLeft === 'number';
       if (!mark.result.element.isConnected) {
         // Something broke; rebuild jumpList on next loop.
-        UI.forceFullCheck = true;
-        UI.interaction = true;
+        needsRecheck = true;
+        if (placed) {
+          holdMark(mark, now);
+          holding ||= !mark.holdExpired;
+          continue;
+        }
         mark.style.display = 'none';
-      } else {
-        //mark.visibility = 'visible';
       }
       let targetOffset = mark.result.element.getBoundingClientRect();
+      // In-frame rects are in the frame's own pixels; scale to ours.
+      const frameScale = frameFor(mark.result.fixedRoot).scale || 1;
 
-      let top = targetOffset.top + scrollTop;
+      let top = targetOffset.top * frameScale + scrollTop;
       //let rightBound = window.innerWidth;
       if (!visible(mark.result.element)) {
         // Invisible target.
         const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+        if (!theFirstVisibleParent && placed) {
+          // Ask once per hold: a recheck that finds the same result adopts
+          // this mark, and asking again each time would recheck forever.
+          if (holdMark(mark, now)) {
+            needsRecheck = true;
+          }
+          holding ||= !mark.holdExpired;
+          continue;
+        }
         targetOffset = theFirstVisibleParent
           ? theFirstVisibleParent.getBoundingClientRect()
           : targetOffset;
-        top = targetOffset.top + scrollTop;
+        top = targetOffset.top * frameScale + scrollTop;
       }
-      let left = targetOffset.left;
+      let left = targetOffset.left * frameScale;
 
       if (mark.result.element.tagName === 'IMG') {
         top = top + 10;
@@ -315,7 +530,7 @@ export function alignButtons() {
 
       if (mark.result.scrollableParent) {
         // Bump alerts that would be X-position out of a scroll zone.
-        UI.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+        UI.jumpList[i].bounds = scrollBoundsFor(mark.result);
         if (left < UI.jumpList[i].bounds.left) {
           left = UI.jumpList[i].bounds.left;
         } else if (left + 40 > UI.jumpList[i].bounds.right) {
@@ -333,6 +548,8 @@ export function alignButtons() {
       UI.jumpList[i].targetOffset = targetOffset;
       UI.jumpList[i].markTop = top;
       UI.jumpList[i].markLeft = left;
+      mark.heldSince = undefined;
+      mark.holdExpired = false;
     }
   } else {
     // Compute based on self position.
@@ -366,11 +583,19 @@ export function alignButtons() {
 
   // Check for overlaps, then write out transforms.
   UI.jumpList.forEach((mark, i) => {
+    if (mark.held) {
+      // Leave the transform as it is; neighbours still nudge around it.
+      previousNudgeTop = mark.nudgeTop || 0;
+      previousNudgeLeft = mark.nudgeLeft || 0;
+      return;
+    }
     // Now check for any needed nudges
     let nudgeTop = 10;
     let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
     // Detect tip that overlaps with previous result.
-    if (mark.markTop + scrollTop < 0) {
+    // Not with alertAttachTo: content can legitimately sit above the
+    // container's top edge, and the container's own clipping deals with it.
+    if (!attachedTo && mark.markTop + scrollTop < 0) {
       // Offscreen to top.
       nudgeTop = -1 * (mark.markTop + scrollTop) - 6;
     }
@@ -406,7 +631,7 @@ export function alignButtons() {
     let constrainRight = window.innerWidth;
 
     if (mark.result.scrollableParent) {
-      const constrained = mark.result.scrollableParent.getBoundingClientRect();
+      const constrained = scrollBoundsFor(mark.result);
       constrainLeft = constrained.left;
       constrainRight = constrainLeft + constrained.width;
     } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
@@ -427,10 +652,12 @@ export function alignButtons() {
       needNudge = true;
     }
     if (!UI.inlineAlerts) {
+      // markLeft is a viewport position; write it relative to the container.
+      const writeLeft = mark.markLeft - origin.left;
       if (needNudge) {
-        mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
+        mark.style.transform = `translate(${writeLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
       } else {
-        mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
+        mark.style.transform = `translate(${writeLeft}px, ${mark.markTop}px)`;
       }
     } else {
       nudgeMark(mark, nudgeLeft, nudgeTop);
@@ -445,48 +672,57 @@ export function alignButtons() {
   if (!UI.inlineAlerts) {
     // Alerts have to be positioned relative to viewport.
     UI.jumpList.forEach((mark) => {
+      if (mark.held) {
+        if (mark.holdExpired) {
+          hideMark(mark);
+        } else {
+          mark.style.pointerEvents = 'none';
+        }
+        return;
+      }
+      const keepShown = () => mark.matches(':focus, :focus-within, [data-ed11y-open="true"]');
       if (mark.result.scrollableParent) {
-        // Hide alerts outside a scroll zone.
+        // Hide alerts outside a scroll zone. Bounds are in main-document
+        // coordinates, so the target has to be as well.
+        const targetTop = toMainDocRect(mark.targetOffset, frameFor(mark.result.fixedRoot)).top;
         if (
           !!mark.bounds &&
-          (mark.targetOffset.top - mark.bounds.top < 0 ||
-            mark.targetOffset.top - mark.bounds.bottom > 0) &&
-          !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')
+          (targetTop - mark.bounds.top < 0 || targetTop - mark.bounds.bottom > 0) &&
+          !keepShown()
         ) {
           // Tip has exited scrollable parent. Visually hide.
-          mark.classList.add('ed11y-offscreen');
-          mark.style.transform = 'translate(0px, -50px)';
-          mark.style.pointerEvents = 'none';
-          if (mark.getAttribute('data-ed11y-open') === 'true') {
-            mark.setAttribute('data-ed11y-action', 'shut');
-          }
+          hideMark(mark);
         } else {
-          mark.classList.remove('ed11y-offscreen');
-          mark.style.pointerEvents = 'auto';
+          showMark(mark);
         }
       } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
+        // Hide alerts whose target has left the frame: more than 40px above
+        // its top, or within 10px of its bottom. Both in main-document pixels,
+        // since that is what the buttons are sized in.
+        const targetTop = mark.bounds
+          ? toMainDocRect(mark.targetOffset, mark.bounds).top - mark.bounds.top
+          : 0;
         if (
           !!mark.bounds &&
-          (mark.targetOffset.top < -40 ||
-            mark.targetOffset.top + mark.bounds.top - mark.bounds.bottom > -10) &&
-          !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')
+          (targetTop < -40 || targetTop > mark.bounds.bottom - mark.bounds.top - 10) &&
+          !keepShown()
         ) {
-          // Tip has exited scrollable parent. Visually hide.
-          mark.classList.add('ed11y-offscreen');
-          mark.style.transform = 'translate(0px, -50px)';
-          mark.style.pointerEvents = 'none';
-          if (mark.getAttribute('data-ed11y-open') === 'true') {
-            mark.setAttribute('data-ed11y-action', 'shut');
-          }
+          hideMark(mark);
         } else {
-          mark.classList.remove('ed11y-offscreen');
-          mark.style.pointerEvents = 'auto';
+          showMark(mark);
         }
       } else {
-        mark.classList.remove('ed11y-offscreen');
-        mark.style.pointerEvents = 'auto';
+        showMark(mark);
       }
     });
+  }
+  if (holding) {
+    scheduleHoldExpiry();
+  }
+  if (needsRecheck) {
+    UI.forceFullCheck = true;
+    UI.interaction = true;
+    incrementalCheckDebounce();
   }
   window.setTimeout(() => {
     UI.jumpList?.forEach((mark) => {

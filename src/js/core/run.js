@@ -26,12 +26,17 @@ import checkDeveloper from '../../sa11y-js/rulesets/developer';
 import Lang from '../../sa11y-js/utils/lang.js';
 import Elements from '../../sa11y-js/utils/elements.js';
 import {
+  alertContainer,
+  alertOrigin,
   alignAlts,
   alignButtons,
   alignPanel,
   checkEditableIntersects,
   closestScrollable,
   focusLoop,
+  frameFor,
+  resolveAlertAttachTo,
+  scrollBoundsFor,
   updateFixedRootPositions,
 } from '../utils/align.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
@@ -115,11 +120,8 @@ export function updatePanel() {
     } else {
       // Reconnect map
       State.results.push(...UI.oldResults);
-      if (!UI.alignPending) {
-        alignButtons();
-        alignPanel();
-        UI.alignPending = false;
-      }
+      alignButtons();
+      alignPanel();
       UI.running = false;
       resumeObservers();
       return;
@@ -548,14 +550,13 @@ function positionHighlight(el, target, result) {
     const visibleParent = firstVisibleParent(target);
     if (visibleParent) targetOffset = visibleParent.getBoundingClientRect();
   }
-  const framePositioner =
-    result.fixedRoot != null && UI.positionedFrames[result.fixedRoot]
-      ? UI.positionedFrames[result.fixedRoot]
-      : { top: 0, left: 0 };
-  el.style.setProperty('width', `${targetOffset.width + 6}px`);
-  el.style.setProperty('height', `${targetOffset.height + 6}px`);
-  el.style.setProperty('top', `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`);
-  el.style.setProperty('left', `${targetOffset.left + framePositioner.left - 3}px`);
+  const frame = frameFor(result.fixedRoot);
+  const scale = frame.scale || 1;
+  const origin = alertOrigin();
+  el.style.setProperty('width', `${targetOffset.width * scale + 6}px`);
+  el.style.setProperty('height', `${targetOffset.height * scale + 6}px`);
+  el.style.setProperty('top', `${targetOffset.top * scale + frame.top - origin.top - 3}px`);
+  el.style.setProperty('left', `${targetOffset.left * scale + frame.left - origin.left - 3}px`);
 }
 
 export function editableHighlighter(resultID, show, firstVisible) {
@@ -585,7 +586,7 @@ export function editableHighlighter(resultID, show, firstVisible) {
     el.classList.add('ed11y-element');
     el.style.setProperty('position', 'absolute');
     el.style.setProperty('pointer-events', 'none');
-    UI.panelAttachTo.appendChild(el);
+    alertContainer().appendChild(el);
     entry.highlight = el;
   }
 
@@ -829,24 +830,32 @@ export function jumpTo(next = true) {
   updateTipLocations();
 }
 
-// RAF-coalesced alignment. Multiple incrementalAlign() calls within one
-// frame collapse to a single realign on the next paint; if a check run is
-// in flight we defer to the following frame rather than racing layout.
-// Replaces a setTimeout-based lagBounce — align is rendering work, so
-// RAF is the right scheduling primitive.
-let alignRafPending = false;
-export function incrementalAlign() {
-  if (alignRafPending) return;
-  alignRafPending = true;
+// At most one updateTipLocations is queued at a time, however many callers
+// ask; align is rendering work, so it runs on the next animation frame.
+let tipLocationsQueued = false;
+function queueTipLocations() {
+  if (tipLocationsQueued) return;
+  tipLocationsQueued = true;
   requestAnimationFrame(() => {
-    alignRafPending = false;
-    if (UI.running || UI.alignPending) {
-      incrementalAlign();
-      return;
-    }
-    UI.scrollPending++;
+    tipLocationsQueued = false;
     updateTipLocations();
   });
+}
+
+// One alignment pass on the next frame; calls within a frame share it. If a
+// check run is in flight, updateTipLocations waits for it to finish.
+export function incrementalAlign() {
+  UI.scrollPending = Math.max(UI.scrollPending, 1);
+  queueTipLocations();
+}
+
+// Public: reposition alerts, highlights and any open tip on the next frame.
+// For integrations whose layout moves without a scroll or resize event the
+// library can see — e.g. a transform-based zoom on a framePositioner, or a
+// scrolling ancestor of it. Cheap to call often: repeat calls in a frame
+// share one pass, and calls while the panel is closed do nothing.
+export function realign() {
+  incrementalAlign();
 }
 
 export function alignTip(button, toolTip, recheck = 0, reveal = false) {
@@ -911,14 +920,17 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   let absoluteBottom = containBottom;
 
   if (!UI.inlineAlerts && result.scrollableParent) {
-    const bounds = result.scrollableParent.getBoundingClientRect();
+    // In main-document coordinates, like the button the tip hangs from.
+    updateFixedRootPositions();
+    const bounds = scrollBoundsFor(result);
     if (bounds.width > 0) {
       //buttonTop = buttonTop + result.scrollableParent.scrollTop;
       containLeft = Math.max(0, bounds.left);
       containWidth = Math.min(containWidth, bounds.width - 30);
       containBottom = bounds.bottom + scrollTop;
       containTop = bounds.top + scrollTop;
-      absoluteBottom = bounds.top + result.scrollableParent.scrollHeight;
+      absoluteBottom =
+        bounds.top + result.scrollableParent.scrollHeight * (frameFor(result.fixedRoot).scale || 1);
     }
   } else if (
     mark.dataset.ed11yHiddenResult === 'true' ||
@@ -1069,20 +1081,32 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   alignHighlights();
 }
 
+// Runs one pending alignment pass (UI.scrollPending counts them, at most 2:
+// one now and one on the next frame for layout that is still settling).
 export function updateTipLocations() {
-  if (!UI.scrollTicking && UI.scrollPending > 0 && !UI.running && UI.jumpList && UI.showPanel) {
+  if (!UI.showPanel || !UI.jumpList?.length) {
+    // Nothing on screen to move. Drop the request rather than retrying until
+    // the panel opens, which aligns from scratch anyway.
+    UI.scrollPending = 0;
+    return;
+  }
+  UI.scrollPending = Math.min(UI.scrollPending, 2);
+  if (!UI.scrollTicking && UI.scrollPending > 0 && !UI.running) {
     UI.scrollTicking = true;
-    alignButtons();
-    if (UI.tipOpen) {
-      alignTip(UI.openTip.button.shadowRoot.querySelector('button'), UI.openTip.tip);
+    try {
+      alignButtons();
+      if (UI.tipOpen) {
+        alignTip(UI.openTip.button.shadowRoot.querySelector('button'), UI.openTip.tip);
+      }
+    } finally {
+      UI.scrollTicking = false;
     }
     UI.scrollPending--;
   }
-  UI.scrollTicking = false;
+  // A pass is still due, or a run is in flight; every run ends by clearing
+  // UI.running, so this retries for no longer than the run lasts.
   if (UI.scrollPending > 0) {
-    window.setTimeout(() => {
-      requestAnimationFrame(() => updateTipLocations());
-    }, 0);
+    queueTipLocations();
   }
 }
 
@@ -1100,8 +1124,6 @@ export function alignHighlights() {
 }
 
 export const slowIncremental = lagBounce(() => {
-  //incrementalAlign(); // Immediately realign tips.
-  //UI.alignPending = false;
   UI.interaction = true;
   incrementalCheckDebounce();
 }, 500);
@@ -1129,8 +1151,8 @@ const scrollWatch = (container) => {
     () => {
       // Trigger on scrolling other containers, unless it will flicker a tip.
       if (!UI.inlineAlerts) {
-        UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
-        requestAnimationFrame(() => updateTipLocations());
+        UI.scrollPending = Math.min(UI.scrollPending + 1, 2);
+        queueTipLocations();
       } else if (UI.tipOpen) {
         alignTip(UI.openTip.button.shadowRoot.querySelector('button'), UI.openTip.tip);
       }
@@ -1404,8 +1426,29 @@ export function startObserver(root) {
   }, 1000);
 }
 
-// Runs one ruleset and records its time in UI.runTimings. The names are passed explicitly
-// because the minified build renames functions.
+// Ends a check run that threw outside a ruleset. Every run sets UI.running and
+// pauses observers, and only a run that finishes undoes them; without this a
+// failure froze Editoria11y until reload: no rechecks, an inert panel toggle,
+// and incrementalAlign retrying every frame.
+function failRun(error) {
+  showError(error);
+  UI.running = false;
+  UI.incrementalRetryPending = false;
+  // Results and marks may be half-updated; rebuild them on the next run.
+  UI.forceFullCheck = true;
+  // Observers are first attached when a run finishes, so a failed first run
+  // would otherwise leave no edit ever rechecked.
+  try {
+    watchForEdits();
+  } catch (watchError) {
+    console.error('Editoria11y:', watchError);
+  }
+  resumeObservers();
+}
+
+// Runs one ruleset and records its time in UI.runTimings. A ruleset that throws
+// is reported and skipped; the run continues with the others. The names are
+// passed explicitly because the minified build renames functions.
 const safeRun = (fn, name) => {
   const start = performance.now();
   try {
@@ -1449,7 +1492,12 @@ const enqueueTests = (queue) => {
     } else {
       window.setTimeout(
         (queue) => {
-          enqueueTests(queue);
+          // Off checkAll's stack, so its catch no longer covers us.
+          try {
+            enqueueTests(queue);
+          } catch (error) {
+            failRun(error);
+          }
         },
         0,
         queue,
@@ -1470,19 +1518,50 @@ function removeCustomTest() {
     continueCheck(true).then();
   }
   if (State.option.customTests === 0) {
-    document.removeEventListener('ed11yResume', () => {
-      UI.customTestsRemaining--;
-      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
-        continueCheck(true).then();
-      }
-    });
+    document.removeEventListener('ed11yResume', onCustomTestResume);
+  }
+}
+
+// A custom test has pushed its results. Two kinds of answer are ignored:
+// - one for another run, recognised by an echoed `detail.runId` that does not
+//   match the run that dispatched ed11yRunCustomTests. Counting it would let
+//   this run paint before its own tests finish. Answers without a runId
+//   (integrations written before run IDs) cannot be told apart and still count.
+// - one nobody is waiting for, e.g. from a test dropped by removeCustomTest
+//   that finishes anyway. Counting it took customTestsRemaining below zero,
+//   and every later run then waited for it to reach zero forever.
+export function onCustomTestResume(event) {
+  const runId = event?.detail?.runId;
+  if (runId !== undefined && runId !== null && Number(runId) !== UI.runGen) {
+    return;
+  }
+  if (UI.customTestsRemaining <= 0) {
+    return;
+  }
+  UI.customTestsRemaining--;
+  if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+    continueCheck(true).then();
   }
 }
 
 UI.testsRemaining = 0;
-// Toggles the outline of all headers, link texts, and images.
+// Starts a check run. The run holds UI.running, which keeps other runs and
+// alignment out, until it finishes, or until failRun clears it if a step
+// throws. Callers that want to skip a click while a run is in flight check
+// and set the flag themselves first.
 export function checkAll() {
+  try {
+    return startRun();
+  } catch (error) {
+    failRun(error);
+    return false;
+  }
+}
+
+function startRun() {
   if (UI.tipOpen) {
+    // Nothing ran, so nothing else will clear the caller's flag.
+    UI.running = false;
     return false;
   }
   // Sa11y's caches only hold for one run: they store results for ancestors as well as for the
@@ -1500,6 +1579,9 @@ export function checkAll() {
   if (checkRunPrevent()) {
     disable();
   }
+  // Set here rather than trusting every caller: dismissals and hardRefresh
+  // call reset(), which clears it, right before calling checkAll.
+  UI.running = true;
 
   UI.customTestsRunning = false;
 
@@ -1560,7 +1642,11 @@ export function checkAll() {
   if (State.option.customTests > 0) {
     // Pause
     UI.customTestsRemaining = State.option.customTests;
-    const customTests = new CustomEvent('ed11yRunCustomTests');
+    // Tests may echo runId on ed11yResume so a late answer for an earlier run
+    // is not counted toward this one; see onCustomTestResume.
+    const customTests = new CustomEvent('ed11yRunCustomTests', {
+      detail: { runId: UI.runGen },
+    });
     document.dispatchEvent(customTests);
     window.clearTimeout(UI.customTestTimeout);
     const customTestRace = performance.now();
@@ -1579,11 +1665,28 @@ export function checkAll() {
   enqueueTests(queue);
 }
 
+// Filters, counts and paints the results of a run once every ruleset is done.
+// Called asynchronously (queued rulesets, custom tests), so it handles its own
+// failures rather than rejecting into callers that do not wait for it.
 export async function continueCheck() {
-  // Capture the generation we started dispatching under. If a newer checkAll
-  // has bumped UI.runGen while we were awaiting async work, the results in
-  // State are about to be discarded anyway — bail before painting.
   const runGenAtDispatch = UI.runGen;
+  try {
+    await finishRun(runGenAtDispatch);
+  } catch (error) {
+    if (UI.runGen === runGenAtDispatch) {
+      failRun(error);
+    } else {
+      // A newer run owns UI.running and the observers now; leave it to
+      // finish, but do not lose the error.
+      showError(error);
+    }
+  }
+}
+
+async function finishRun(runGenAtDispatch) {
+  // If a newer checkAll has bumped UI.runGen while we were awaiting async
+  // work, the results in State are about to be discarded anyway — bail
+  // before painting.
   // Filter split configuration results.
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
@@ -1611,28 +1714,33 @@ export async function continueCheck() {
   }
 
   updatePanel();
-  window.setTimeout(() => {
-    if (State.option.watchForChanges) {
-      Elements.Found.editable?.forEach((editable) => {
-        if (!editable.matches('.drag-observe')) {
-          editable.classList.add('drag-observe');
-          editable.addEventListener('drop', () => {
-            // This event does not bubble.
-            UI.forceFullCheck = true;
-            incrementalCheckDebounce();
-          });
-        }
+  window.setTimeout(watchForEdits, 0);
+}
+
+// Watches the checked content for edits, per the watchForChanges option.
+// Safe to repeat: listeners and observers are only attached once per element.
+function watchForEdits() {
+  if (!State.option.watchForChanges) {
+    return;
+  }
+  Elements.Found.editable?.forEach((editable) => {
+    if (!editable.matches('.drag-observe')) {
+      editable.classList.add('drag-observe');
+      editable.addEventListener('drop', () => {
+        // This event does not bubble.
+        UI.forceFullCheck = true;
+        incrementalCheckDebounce();
       });
-      if (State.option.watchForChanges === 'checkRoots') {
-        UI.roots?.forEach((root) => {
-          startObserver(root);
-        });
-      } else {
-        startObserver(document.body);
-      }
-      resumeObservers(); // on recheck.
     }
-  }, 0);
+  });
+  if (State.option.watchForChanges === 'checkRoots') {
+    UI.roots?.forEach((root) => {
+      startObserver(root);
+    });
+  } else {
+    startObserver(document.body);
+  }
+  resumeObservers(); // on recheck.
 }
 
 export function incrementalCheck() {
@@ -1694,6 +1802,24 @@ export function refresh() {
 //
 // Pass an empty array to clear fixedRoots — the library falls back to scanning
 // State.option.checkRoot against the outer document.
+// Public: moves alert buttons and highlights into a new container (an element
+// or a selector), or back to panelAttachTo when given false. For
+// integrations that re-render the element they passed as alertAttachTo.
+export function setAlertAttachTo(container) {
+  State.option.alertAttachTo = resolveAlertAttachTo(container);
+  const target = alertContainer();
+  for (const entry of UI.markRegistry) {
+    // Inline buttons sit beside their targets; only editable-mode ones move.
+    if (!UI.inlineAlerts && entry.button?.isConnected) {
+      target.append(entry.button);
+    }
+    if (entry.highlight?.isConnected) {
+      target.append(entry.highlight);
+    }
+  }
+  realign();
+}
+
 export function setFixedRoots(newFixedRoots, newFramePositioners, newEditableContent) {
   State.option.fixedRoots =
     Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;
