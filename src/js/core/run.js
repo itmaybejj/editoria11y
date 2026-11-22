@@ -35,6 +35,7 @@ import {
   closestScrollable,
   focusLoop,
   frameFor,
+  resolveAlertAttachTo,
   scrollBoundsFor,
   updateFixedRootPositions,
 } from '../utils/align.js';
@@ -829,35 +830,32 @@ export function jumpTo(next = true) {
   updateTipLocations();
 }
 
-// RAF-coalesced alignment. Multiple incrementalAlign() calls within one
-// frame collapse to a single realign on the next paint; if a check run is
-// in flight we defer to the following frame rather than racing layout.
-// Replaces a setTimeout-based lagBounce — align is rendering work, so
-// RAF is the right scheduling primitive. The retry only spins while a run
-// is in flight; every run clears UI.running when it finishes.
-let alignRafPending = false;
-export function incrementalAlign() {
-  if (alignRafPending) return;
-  alignRafPending = true;
+// At most one updateTipLocations is queued at a time, however many callers
+// ask; align is rendering work, so it runs on the next animation frame.
+let tipLocationsQueued = false;
+function queueTipLocations() {
+  if (tipLocationsQueued) return;
+  tipLocationsQueued = true;
   requestAnimationFrame(() => {
-    alignRafPending = false;
-    if (UI.running) {
-      incrementalAlign();
-      return;
-    }
-    UI.scrollPending++;
+    tipLocationsQueued = false;
     updateTipLocations();
   });
+}
+
+// One alignment pass on the next frame; calls within a frame share it. If a
+// check run is in flight, updateTipLocations waits for it to finish.
+export function incrementalAlign() {
+  UI.scrollPending = Math.max(UI.scrollPending, 1);
+  queueTipLocations();
 }
 
 // Public: reposition alerts, highlights and any open tip on the next frame.
 // For integrations whose layout moves without a scroll or resize event the
 // library can see — e.g. a transform-based zoom on a framePositioner, or a
-// scrolling ancestor of it.
+// scrolling ancestor of it. Cheap to call often: repeat calls in a frame
+// share one pass, and calls while the panel is closed do nothing.
 export function realign() {
-  // Same path as a watched container scrolling; coalesces repeat calls.
-  UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
-  requestAnimationFrame(() => updateTipLocations());
+  incrementalAlign();
 }
 
 export function alignTip(button, toolTip, recheck = 0, reveal = false) {
@@ -1083,20 +1081,32 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   alignHighlights();
 }
 
+// Runs one pending alignment pass (UI.scrollPending counts them, at most 2:
+// one now and one on the next frame for layout that is still settling).
 export function updateTipLocations() {
-  if (!UI.scrollTicking && UI.scrollPending > 0 && !UI.running && UI.jumpList && UI.showPanel) {
+  if (!UI.showPanel || !UI.jumpList?.length) {
+    // Nothing on screen to move. Drop the request rather than retrying until
+    // the panel opens, which aligns from scratch anyway.
+    UI.scrollPending = 0;
+    return;
+  }
+  UI.scrollPending = Math.min(UI.scrollPending, 2);
+  if (!UI.scrollTicking && UI.scrollPending > 0 && !UI.running) {
     UI.scrollTicking = true;
-    alignButtons();
-    if (UI.tipOpen) {
-      alignTip(UI.openTip.button.shadowRoot.querySelector('button'), UI.openTip.tip);
+    try {
+      alignButtons();
+      if (UI.tipOpen) {
+        alignTip(UI.openTip.button.shadowRoot.querySelector('button'), UI.openTip.tip);
+      }
+    } finally {
+      UI.scrollTicking = false;
     }
     UI.scrollPending--;
   }
-  UI.scrollTicking = false;
+  // A pass is still due, or a run is in flight; every run ends by clearing
+  // UI.running, so this retries for no longer than the run lasts.
   if (UI.scrollPending > 0) {
-    window.setTimeout(() => {
-      requestAnimationFrame(() => updateTipLocations());
-    }, 0);
+    queueTipLocations();
   }
 }
 
@@ -1141,8 +1151,8 @@ const scrollWatch = (container) => {
     () => {
       // Trigger on scrolling other containers, unless it will flicker a tip.
       if (!UI.inlineAlerts) {
-        UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
-        requestAnimationFrame(() => updateTipLocations());
+        UI.scrollPending = Math.min(UI.scrollPending + 1, 2);
+        queueTipLocations();
       } else if (UI.tipOpen) {
         alignTip(UI.openTip.button.shadowRoot.querySelector('button'), UI.openTip.tip);
       }
@@ -1426,6 +1436,13 @@ function failRun(error) {
   UI.incrementalRetryPending = false;
   // Results and marks may be half-updated; rebuild them on the next run.
   UI.forceFullCheck = true;
+  // Observers are first attached when a run finishes, so a failed first run
+  // would otherwise leave no edit ever rechecked.
+  try {
+    watchForEdits();
+  } catch (watchError) {
+    console.error('Editoria11y:', watchError);
+  }
   resumeObservers();
 }
 
@@ -1528,8 +1545,10 @@ export function onCustomTestResume(event) {
 }
 
 UI.testsRemaining = 0;
-// Starts a check run. Callers set UI.running first; the run clears it when it
-// finishes, or failRun does if any step throws.
+// Starts a check run. The run holds UI.running, which keeps other runs and
+// alignment out, until it finishes, or until failRun clears it if a step
+// throws. Callers that want to skip a click while a run is in flight check
+// and set the flag themselves first.
 export function checkAll() {
   try {
     return startRun();
@@ -1560,6 +1579,9 @@ function startRun() {
   if (checkRunPrevent()) {
     disable();
   }
+  // Set here rather than trusting every caller: dismissals and hardRefresh
+  // call reset(), which clears it, right before calling checkAll.
+  UI.running = true;
 
   UI.customTestsRunning = false;
 
@@ -1651,9 +1673,12 @@ export async function continueCheck() {
   try {
     await finishRun(runGenAtDispatch);
   } catch (error) {
-    // A newer run owns UI.running now; leave it to finish.
     if (UI.runGen === runGenAtDispatch) {
       failRun(error);
+    } else {
+      // A newer run owns UI.running and the observers now; leave it to
+      // finish, but do not lose the error.
+      showError(error);
     }
   }
 }
@@ -1689,28 +1714,33 @@ async function finishRun(runGenAtDispatch) {
   }
 
   updatePanel();
-  window.setTimeout(() => {
-    if (State.option.watchForChanges) {
-      Elements.Found.editable?.forEach((editable) => {
-        if (!editable.matches('.drag-observe')) {
-          editable.classList.add('drag-observe');
-          editable.addEventListener('drop', () => {
-            // This event does not bubble.
-            UI.forceFullCheck = true;
-            incrementalCheckDebounce();
-          });
-        }
+  window.setTimeout(watchForEdits, 0);
+}
+
+// Watches the checked content for edits, per the watchForChanges option.
+// Safe to repeat: listeners and observers are only attached once per element.
+function watchForEdits() {
+  if (!State.option.watchForChanges) {
+    return;
+  }
+  Elements.Found.editable?.forEach((editable) => {
+    if (!editable.matches('.drag-observe')) {
+      editable.classList.add('drag-observe');
+      editable.addEventListener('drop', () => {
+        // This event does not bubble.
+        UI.forceFullCheck = true;
+        incrementalCheckDebounce();
       });
-      if (State.option.watchForChanges === 'checkRoots') {
-        UI.roots?.forEach((root) => {
-          startObserver(root);
-        });
-      } else {
-        startObserver(document.body);
-      }
-      resumeObservers(); // on recheck.
     }
-  }, 0);
+  });
+  if (State.option.watchForChanges === 'checkRoots') {
+    UI.roots?.forEach((root) => {
+      startObserver(root);
+    });
+  } else {
+    startObserver(document.body);
+  }
+  resumeObservers(); // on recheck.
 }
 
 export function incrementalCheck() {
@@ -1772,6 +1802,24 @@ export function refresh() {
 //
 // Pass an empty array to clear fixedRoots — the library falls back to scanning
 // State.option.checkRoot against the outer document.
+// Public: moves alert buttons and highlights into a new container (an element
+// or a selector), or back to panelAttachTo when given false. For
+// integrations that re-render the element they passed as alertAttachTo.
+export function setAlertAttachTo(container) {
+  State.option.alertAttachTo = resolveAlertAttachTo(container);
+  const target = alertContainer();
+  for (const entry of UI.markRegistry) {
+    // Inline buttons sit beside their targets; only editable-mode ones move.
+    if (!UI.inlineAlerts && entry.button?.isConnected) {
+      target.append(entry.button);
+    }
+    if (entry.highlight?.isConnected) {
+      target.append(entry.highlight);
+    }
+  }
+  realign();
+}
+
 export function setFixedRoots(newFixedRoots, newFramePositioners, newEditableContent) {
   State.option.fixedRoots =
     Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;

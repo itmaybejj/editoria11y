@@ -1,7 +1,7 @@
 import Lang from '../sa11y-js/utils/lang';
 import { computeAccessibleName } from '../sa11y-js/utils/computeAccessibleName.js';
 import Elements from '../sa11y-js/utils/elements.js';
-import { realign, reset, refresh, setFixedRoots } from './core/run.js';
+import { realign, reset, refresh, setAlertAttachTo, setFixedRoots } from './core/run.js';
 import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
@@ -44,6 +44,7 @@ export {
   refresh,
   reset,
   sanitizeHTML,
+  setAlertAttachTo, // Move alerts into a new alertAttachTo container.
   setFixedRoots,
   sprite,
   version,

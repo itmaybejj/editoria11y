@@ -63,6 +63,59 @@ test('realign keeps working after the first edit', async ({ page }) => {
   }
 });
 
+/** Animation frames requested during `ms` of otherwise idle time. */
+async function framesDuring(page, ms = 500) {
+  return page.evaluate(async (wait) => {
+    let count = 0;
+    const raf = window.requestAnimationFrame;
+    window.requestAnimationFrame = (cb) => {
+      count++;
+      return raf.call(window, cb);
+    };
+    await new Promise((resolve) => setTimeout(resolve, wait));
+    window.requestAnimationFrame = raf;
+    return count;
+  }, ms);
+}
+
+test.describe('Ed11y.realign()', () => {
+  test('moves buttons after a layout change the library cannot see', async ({ page }) => {
+    await gotoSettled(page);
+    const before = await page.evaluate(buttonOffsets);
+    // A style change is not a mutation the observer watches, nor a scroll or resize.
+    await page.evaluate(() => {
+      document.querySelector('main').style.marginTop = '200px';
+    });
+    await page.waitForTimeout(REALIGN_MS);
+    expect(await page.evaluate(buttonOffsets), 'nothing realigned by itself').not.toEqual(before);
+
+    await page.evaluate(() => Ed11y.realign());
+    await expect
+      .poll(() => page.evaluate(buttonOffsets), { timeout: REALIGN_MS })
+      .toEqual(before);
+  });
+
+  test('settles after many calls', async ({ page }) => {
+    await gotoSettled(page);
+    await page.evaluate(() => {
+      for (let i = 0; i < 20; i++) Ed11y.realign();
+    });
+    await page.waitForTimeout(100);
+    expect(await framesDuring(page)).toBeLessThan(3);
+  });
+
+  test('does nothing while the panel is closed', async ({ page }) => {
+    await gotoSettled(page);
+    await page.evaluate(() => Ed11y.UI.panelToggle.click());
+    await expect.poll(() => page.evaluate(() => Ed11y.UI.showPanel)).toBe(false);
+    await page.evaluate(() => {
+      for (let i = 0; i < 20; i++) Ed11y.realign();
+    });
+    await page.waitForTimeout(100);
+    expect(await framesDuring(page)).toBeLessThan(3);
+  });
+});
+
 test('no animation-frame loop keeps running once aligned', async ({ page }) => {
   await gotoSettled(page);
   await typeWords(page, 100);

@@ -11,9 +11,11 @@ export const defaults = {
   framePositioners: false, // Parallel array of wrapper elements outside each
   // iframe; framePositioners[i] offsets annotations for fixedRoots[i]. Use
   // false (or omit) when roots are in the main document.
-  alertAttachTo: false, // Positioned element to append alert buttons and
-  // highlights to, instead of panelAttachTo. They are positioned relative to
-  // it, so they scroll and clip with it. Tips still attach to panelAttachTo.
+  alertAttachTo: false, // Positioned element (or a selector for one) to
+  // append alert buttons and highlights to, instead of panelAttachTo. They
+  // are positioned relative to it, so they scroll and clip with it. Tips
+  // still attach to panelAttachTo. If it leaves the page, alerts fall back to
+  // panelAttachTo; pass a replacement to Ed11y.setAlertAttachTo().
 
   // Exclusions
   containerIgnore: '',

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" media="all" href="../dist/css/editoria11y.css">
+    <title>Canvas Fixture</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        /* A page-builder style canvas: a scrolling viewport holding a zoomable
+           stage, holding the iframe that is being edited. */
+        #viewport {
+            position: relative;
+            overflow: auto;
+            width: 900px;
+            height: 500px;
+            margin: 40px 0 0 60px;
+            border: 1px solid #999;
+        }
+
+        #viewport.static {
+            position: static;
+        }
+
+        #stage {
+            transform-origin: 0 0;
+            width: 1700px;
+            height: 2600px;
+        }
+
+        #canvas {
+            display: block;
+            width: 1600px;
+            height: 2400px;
+            margin: 30px 0 0 50px;
+            border: 4px solid #333;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Canvas fixture</h1>
+    <!-- Offline fixture for e2e/tests/canvas.spec.js.
+         ?scale=<n>   initial zoom of #stage (default 1)
+         ?attach=element|selector|static|missing   how alertAttachTo is passed
+         (omitted: alerts attach to the body as usual) -->
+    <div id="viewport">
+        <div id="stage">
+            <iframe id="canvas" title="Canvas" srcdoc='<!DOCTYPE html>
+<html lang="en"><head><title>Canvas document</title></head>
+<body style="margin:0;padding:120px 200px;font:16px sans-serif">
+  <p style="margin-bottom:300px"><a id="first" href="#a">click here</a></p>
+  <p style="margin-bottom:300px"><a id="second" href="#b">read more</a></p>
+  <div id="scroller" style="height:150px;overflow:auto;border:1px solid #666">
+    <p><a id="inside" href="#c">learn more</a></p>
+    <div style="height:600px"></div>
+    <p><a id="below" href="#d">more info</a></p>
+  </div>
+</body></html>'></iframe>
+        </div>
+    </div>
+    <script src="../dist/js/ed11y.umd.js"></script>
+    <script src="../dist/js/lang/en.umd.js"></script>
+    <script>
+        onload = () => {
+            const params = new URLSearchParams(location.search);
+            const viewport = document.getElementById('viewport');
+            const frame = document.getElementById('canvas');
+            document.getElementById('stage').style.transform = `scale(${Number(params.get('scale')) || 1})`;
+            const options = {
+                lang: Ed11yLangEn.lang,
+                alertMode: 'assertive',
+                inlineAlerts: false,
+                fixedRoots: [frame.contentDocument.body],
+                framePositioners: [frame],
+            };
+            switch (params.get('attach')) {
+                case 'element':
+                    options.alertAttachTo = viewport;
+                    break;
+                case 'selector':
+                    options.alertAttachTo = '#viewport';
+                    break;
+                case 'static':
+                    viewport.classList.add('static');
+                    options.alertAttachTo = viewport;
+                    break;
+                case 'missing':
+                    options.alertAttachTo = '#no-such-element';
+                    break;
+            }
+            new Ed11y.Ed11y(options);
+        };
+    </script>
+</body>
+
+</html>

@@ -5404,6 +5404,45 @@ ${this.error.stack}
       });
     }
   }
+  const HOLD_MS = 1e3;
+  let holdTimer = 0;
+  function holdMark(mark, now) {
+    mark.held = true;
+    const first = mark.heldSince === void 0;
+    if (first) {
+      mark.heldSince = now;
+    }
+    mark.holdExpired = now - mark.heldSince >= HOLD_MS;
+    return first;
+  }
+  function scheduleHoldExpiry() {
+    if (holdTimer) {
+      return;
+    }
+    holdTimer = window.setTimeout(() => {
+      holdTimer = 0;
+      if (!UI.showPanel || !UI.jumpList?.length) {
+        return;
+      }
+      if (UI.running) {
+        scheduleHoldExpiry();
+        return;
+      }
+      alignButtons();
+    }, HOLD_MS);
+  }
+  function hideMark(mark) {
+    mark.classList.add("ed11y-offscreen");
+    mark.style.transform = "translate(0px, -50px)";
+    mark.style.pointerEvents = "none";
+    if (mark.getAttribute("data-ed11y-open") === "true") {
+      mark.setAttribute("data-ed11y-action", "shut");
+    }
+  }
+  function showMark(mark) {
+    mark.classList.remove("ed11y-offscreen");
+    mark.style.pointerEvents = "auto";
+  }
   const intersect = (a, b, x = 10) => {
     return a.left - x <= b.right && b.left - x <= a.right && a.top - x <= b.bottom && b.top - x <= a.bottom;
   };
@@ -5570,9 +5609,52 @@ ${this.error.stack}
       scale
     };
   }
-  const alertContainer = () => State.option.alertAttachTo || UI.panelAttachTo;
-  function alertOrigin() {
+  function resolveAlertAttachTo(value) {
+    if (!value) {
+      return false;
+    }
+    let container = value;
+    if (typeof value === "string") {
+      try {
+        container = document.querySelector(value);
+      } catch {
+        container = null;
+      }
+    }
+    if (container?.nodeType !== 1) {
+      console.warn(
+        typeof value === "string" ? `Editoria11y: alertAttachTo "${value}" matches no element; alerts attach to panelAttachTo instead.` : "Editoria11y: alertAttachTo is not an element; alerts attach to panelAttachTo instead."
+      );
+      return false;
+    }
+    if (container.isConnected && getComputedStyle(container).position === "static") {
+      console.warn(
+        "Editoria11y: the alertAttachTo container is not positioned. Give it position: relative (or any value but static), or alerts will be misplaced."
+      );
+    }
+    return container;
+  }
+  let warnedDetached = false;
+  function alertAttachTarget() {
     const container = State.option.alertAttachTo;
+    if (!container) {
+      return null;
+    }
+    if (container.isConnected) {
+      warnedDetached = false;
+      return container;
+    }
+    if (!warnedDetached) {
+      warnedDetached = true;
+      console.warn(
+        "Editoria11y: the alertAttachTo container was removed from the page; alerts attach to panelAttachTo until Ed11y.setAlertAttachTo() is given a new one."
+      );
+    }
+    return null;
+  }
+  const alertContainer = () => alertAttachTarget() || UI.panelAttachTo;
+  function alertOrigin() {
+    const container = alertAttachTarget();
     if (!container) {
       return { top: -window.scrollY, left: 0 };
     }
@@ -5625,8 +5707,15 @@ ${this.error.stack}
     updateFixedRootPositions();
     let previousNudgeTop = 0;
     let previousNudgeLeft = 0;
+    const attachedTo = UI.inlineAlerts ? null : alertAttachTarget();
     const origin = UI.inlineAlerts ? { top: -window.scrollY, left: 0 } : alertOrigin();
     const scrollTop = -origin.top;
+    const now = performance.now();
+    let holding = false;
+    let needsRecheck = false;
+    UI.jumpList.forEach((mark) => {
+      mark.held = false;
+    });
     if (!UI.inlineAlerts) {
       for (let i = 0; i < UI.jumpList.length; i++) {
         const mark = UI.jumpList[i];
@@ -5634,13 +5723,15 @@ ${this.error.stack}
           console.warn("Editoria11y debug: element disappeared");
           continue;
         }
+        if (!mark.isConnected) {
+          needsRecheck = true;
+        }
         const placed = typeof mark.markTop === "number" && typeof mark.markLeft === "number";
-        mark.held = false;
         if (!mark.result.element.isConnected) {
-          UI.forceFullCheck = true;
-          UI.interaction = true;
+          needsRecheck = true;
           if (placed) {
-            mark.held = true;
+            holdMark(mark, now);
+            holding ||= !mark.holdExpired;
             continue;
           }
           mark.style.display = "none";
@@ -5651,7 +5742,10 @@ ${this.error.stack}
         if (!visible(mark.result.element)) {
           const theFirstVisibleParent = firstVisibleParent(mark.result.element);
           if (!theFirstVisibleParent && placed) {
-            mark.held = true;
+            if (holdMark(mark, now)) {
+              needsRecheck = true;
+            }
+            holding ||= !mark.holdExpired;
             continue;
           }
           targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
@@ -5686,6 +5780,8 @@ ${this.error.stack}
         UI.jumpList[i].targetOffset = targetOffset;
         UI.jumpList[i].markTop = top;
         UI.jumpList[i].markLeft = left;
+        mark.heldSince = void 0;
+        mark.holdExpired = false;
       }
     } else {
       UI.jumpList.forEach((mark) => {
@@ -5719,7 +5815,7 @@ ${this.error.stack}
       }
       let nudgeTop = 10;
       let nudgeLeft = mark.result.element.tagName === "IMG" ? 10 : -34;
-      if (!State.option.alertAttachTo && mark.markTop + scrollTop < 0) {
+      if (!attachedTo && mark.markTop + scrollTop < 0) {
         nudgeTop = -1 * (mark.markTop + scrollTop) - 6;
       }
       if (i > 0 && overlap(
@@ -5779,38 +5875,40 @@ ${this.error.stack}
     if (!UI.inlineAlerts) {
       UI.jumpList.forEach((mark) => {
         if (mark.held) {
+          if (mark.holdExpired) {
+            hideMark(mark);
+          } else {
+            mark.style.pointerEvents = "none";
+          }
           return;
         }
+        const keepShown = () => mark.matches(':focus, :focus-within, [data-ed11y-open="true"]');
         if (mark.result.scrollableParent) {
           const targetTop = toMainDocRect(mark.targetOffset, frameFor(mark.result.fixedRoot)).top;
-          if (!!mark.bounds && (targetTop - mark.bounds.top < 0 || targetTop - mark.bounds.bottom > 0) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
-            mark.classList.add("ed11y-offscreen");
-            mark.style.transform = "translate(0px, -50px)";
-            mark.style.pointerEvents = "none";
-            if (mark.getAttribute("data-ed11y-open") === "true") {
-              mark.setAttribute("data-ed11y-action", "shut");
-            }
+          if (!!mark.bounds && (targetTop - mark.bounds.top < 0 || targetTop - mark.bounds.bottom > 0) && !keepShown()) {
+            hideMark(mark);
           } else {
-            mark.classList.remove("ed11y-offscreen");
-            mark.style.pointerEvents = "auto";
+            showMark(mark);
           }
         } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
-          if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top * (mark.bounds.scale || 1) + mark.bounds.top - mark.bounds.bottom > -10) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
-            mark.classList.add("ed11y-offscreen");
-            mark.style.transform = "translate(0px, -50px)";
-            mark.style.pointerEvents = "none";
-            if (mark.getAttribute("data-ed11y-open") === "true") {
-              mark.setAttribute("data-ed11y-action", "shut");
-            }
+          const targetTop = mark.bounds ? toMainDocRect(mark.targetOffset, mark.bounds).top - mark.bounds.top : 0;
+          if (!!mark.bounds && (targetTop < -40 || targetTop > mark.bounds.bottom - mark.bounds.top - 10) && !keepShown()) {
+            hideMark(mark);
           } else {
-            mark.classList.remove("ed11y-offscreen");
-            mark.style.pointerEvents = "auto";
+            showMark(mark);
           }
         } else {
-          mark.classList.remove("ed11y-offscreen");
-          mark.style.pointerEvents = "auto";
+          showMark(mark);
         }
       });
+    }
+    if (holding) {
+      scheduleHoldExpiry();
+    }
+    if (needsRecheck) {
+      UI.forceFullCheck = true;
+      UI.interaction = true;
+      incrementalCheckDebounce();
     }
     window.setTimeout(() => {
       UI.jumpList?.forEach((mark) => {
@@ -7704,23 +7802,21 @@ ${this.error.stack}
     UI.scrollPending = 2;
     updateTipLocations();
   }
-  let alignRafPending = false;
-  function incrementalAlign() {
-    if (alignRafPending) return;
-    alignRafPending = true;
+  let tipLocationsQueued = false;
+  function queueTipLocations() {
+    if (tipLocationsQueued) return;
+    tipLocationsQueued = true;
     requestAnimationFrame(() => {
-      alignRafPending = false;
-      if (UI.running) {
-        incrementalAlign();
-        return;
-      }
-      UI.scrollPending++;
+      tipLocationsQueued = false;
       updateTipLocations();
     });
   }
+  function incrementalAlign() {
+    UI.scrollPending = Math.max(UI.scrollPending, 1);
+    queueTipLocations();
+  }
   function realign() {
-    UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
-    requestAnimationFrame(() => updateTipLocations());
+    incrementalAlign();
   }
   function alignTip(button, toolTip, recheck = 0, reveal = false) {
     if (!toolTip) {
@@ -7898,19 +7994,25 @@ ${this.error.stack}
     alignHighlights();
   }
   function updateTipLocations() {
-    if (!UI.scrollTicking && UI.scrollPending > 0 && !UI.running && UI.jumpList && UI.showPanel) {
+    if (!UI.showPanel || !UI.jumpList?.length) {
+      UI.scrollPending = 0;
+      return;
+    }
+    UI.scrollPending = Math.min(UI.scrollPending, 2);
+    if (!UI.scrollTicking && UI.scrollPending > 0 && !UI.running) {
       UI.scrollTicking = true;
-      alignButtons();
-      if (UI.tipOpen) {
-        alignTip(UI.openTip.button.shadowRoot.querySelector("button"), UI.openTip.tip);
+      try {
+        alignButtons();
+        if (UI.tipOpen) {
+          alignTip(UI.openTip.button.shadowRoot.querySelector("button"), UI.openTip.tip);
+        }
+      } finally {
+        UI.scrollTicking = false;
       }
       UI.scrollPending--;
     }
-    UI.scrollTicking = false;
     if (UI.scrollPending > 0) {
-      window.setTimeout(() => {
-        requestAnimationFrame(() => updateTipLocations());
-      }, 0);
+      queueTipLocations();
     }
   }
   function alignHighlights() {
@@ -7943,8 +8045,8 @@ ${this.error.stack}
       "scroll",
       () => {
         if (!UI.inlineAlerts) {
-          UI.scrollPending = UI.scrollPending < 2 ? UI.scrollPending + 1 : UI.scrollPending;
-          requestAnimationFrame(() => updateTipLocations());
+          UI.scrollPending = Math.min(UI.scrollPending + 1, 2);
+          queueTipLocations();
         } else if (UI.tipOpen) {
           alignTip(UI.openTip.button.shadowRoot.querySelector("button"), UI.openTip.tip);
         }
@@ -8150,6 +8252,11 @@ ${this.error.stack}
     UI.running = false;
     UI.incrementalRetryPending = false;
     UI.forceFullCheck = true;
+    try {
+      watchForEdits();
+    } catch (watchError) {
+      console.error("Editoria11y:", watchError);
+    }
     resumeObservers();
   }
   const safeRun = (fn, name) => {
@@ -8256,6 +8363,7 @@ ${this.error.stack}
     if (checkRunPrevent()) {
       disable();
     }
+    UI.running = true;
     UI.customTestsRunning = false;
     if (UI.splitConfiguration.active) {
       Object.assign(State.option, UI.splitConfiguration.devOptions);
@@ -8325,6 +8433,8 @@ ${this.error.stack}
     } catch (error) {
       if (UI.runGen === runGenAtDispatch) {
         failRun(error);
+      } else {
+        showError(error);
       }
     }
   }
@@ -8353,27 +8463,29 @@ ${this.error.stack}
       showAltPanel();
     }
     updatePanel();
-    window.setTimeout(() => {
-      if (State.option.watchForChanges) {
-        Elements.Found.editable?.forEach((editable) => {
-          if (!editable.matches(".drag-observe")) {
-            editable.classList.add("drag-observe");
-            editable.addEventListener("drop", () => {
-              UI.forceFullCheck = true;
-              incrementalCheckDebounce();
-            });
-          }
+    window.setTimeout(watchForEdits, 0);
+  }
+  function watchForEdits() {
+    if (!State.option.watchForChanges) {
+      return;
+    }
+    Elements.Found.editable?.forEach((editable) => {
+      if (!editable.matches(".drag-observe")) {
+        editable.classList.add("drag-observe");
+        editable.addEventListener("drop", () => {
+          UI.forceFullCheck = true;
+          incrementalCheckDebounce();
         });
-        if (State.option.watchForChanges === "checkRoots") {
-          UI.roots?.forEach((root) => {
-            startObserver(root);
-          });
-        } else {
-          startObserver(document.body);
-        }
-        resumeObservers();
       }
-    }, 0);
+    });
+    if (State.option.watchForChanges === "checkRoots") {
+      UI.roots?.forEach((root) => {
+        startObserver(root);
+      });
+    } else {
+      startObserver(document.body);
+    }
+    resumeObservers();
   }
   function incrementalCheck() {
     if (!UI.running) {
@@ -8415,6 +8527,19 @@ ${this.error.stack}
   }, 250);
   function refresh() {
     incrementalCheckDebounce();
+  }
+  function setAlertAttachTo(container) {
+    State.option.alertAttachTo = resolveAlertAttachTo(container);
+    const target = alertContainer();
+    for (const entry of UI.markRegistry) {
+      if (!UI.inlineAlerts && entry.button?.isConnected) {
+        target.append(entry.button);
+      }
+      if (entry.highlight?.isConnected) {
+        target.append(entry.highlight);
+      }
+    }
+    realign();
   }
   function setFixedRoots(newFixedRoots, newFramePositioners, newEditableContent) {
     State.option.fixedRoots = Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;
@@ -9668,7 +9793,8 @@ ${this.error.stack}
       "website",
       "article",
       "go",
-      "workshop"
+      "workshop",
+      "follow us on"
     ],
     CLICK: ["click"],
     NEW_WINDOW_PHRASES: [
@@ -10419,9 +10545,11 @@ ${this.error.stack}
     // iframe; framePositioners[i] offsets annotations for fixedRoots[i]. Use
     // false (or omit) when roots are in the main document.
     alertAttachTo: false,
-    // Positioned element to append alert buttons and
-    // highlights to, instead of panelAttachTo. They are positioned relative to
-    // it, so they scroll and clip with it. Tips still attach to panelAttachTo.
+    // Positioned element (or a selector for one) to
+    // append alert buttons and highlights to, instead of panelAttachTo. They
+    // are positioned relative to it, so they scroll and clip with it. Tips
+    // still attach to panelAttachTo. If it leaves the page, alerts fall back to
+    // panelAttachTo; pass a replacement to Ed11y.setAlertAttachTo().
     // Exclusions
     containerIgnore: "",
     contrastIgnore: ".sr-only",
@@ -11254,6 +11382,7 @@ ${this.error.stack}
         UI.disabled = true;
         return false;
       }
+      State.option.alertAttachTo = resolveAlertAttachTo(State.option.alertAttachTo);
       UI.running = true;
       document.addEventListener("ed11yResume", onCustomTestResume);
       checkAll();
@@ -11322,6 +11451,7 @@ ${this.error.stack}
   exports2.refresh = refresh;
   exports2.reset = reset;
   exports2.sanitizeHTML = sanitizeHTML;
+  exports2.setAlertAttachTo = setAlertAttachTo;
   exports2.setFixedRoots = setFixedRoots;
   exports2.sprite = sprite;
   exports2.version = version;

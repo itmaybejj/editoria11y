@@ -130,3 +130,78 @@ test('a ruleset that throws is reported once and the other rulesets still run', 
   expect(await page.evaluate(errorDialogs), 'one dialog, not one per run').toBe(1);
   expect(await page.evaluate(() => Ed11y.UI.running)).toBe(false);
 });
+
+test('a first run that fails still leaves later edits checked', async ({ page }) => {
+  // Fail while painting the first run, once the panel exists: when it
+  // enables the panel toggle.
+  await page.addInitScript(() => {
+    const remove = Element.prototype.removeAttribute;
+    window.__ed11yFailures = 0;
+    Element.prototype.removeAttribute = function (name) {
+      if (window.__ed11yFailures === 0 && this.id === 'ed11y-toggle' && name === 'aria-disabled') {
+        window.__ed11yFailures++;
+        throw new Error('Simulated first paint failure');
+      }
+      return remove.call(this, name);
+    };
+  });
+  await page.goto(PAGE);
+  await page.waitForFunction(() => window.__ed11yFailures === 1);
+  await expect.poll(() => page.evaluate(() => Ed11y.UI.running)).toBe(false);
+
+  await addIssue(page, 'after-first-failure');
+  await expect.poll(() => isFlagged(page, 'after-first-failure')).toBe(true);
+});
+
+test('a failure in a run that a newer run replaced is still reported', async ({ page }) => {
+  const errors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+  await gotoPainted(page, PAGE);
+
+  // Fail while painting, after a newer run has started (bumped the generation).
+  await page.evaluate(() => {
+    const toggle = Ed11y.UI.panelToggle;
+    const original = toggle.removeAttribute;
+    window.__ed11yFailNext = true;
+    toggle.removeAttribute = function (...args) {
+      if (window.__ed11yFailNext) {
+        window.__ed11yFailNext = false;
+        Ed11y.UI.runGen++;
+        throw new Error('Simulated superseded failure');
+      }
+      return original.apply(this, args);
+    };
+  });
+  await addIssue(page, 'superseded');
+  await expect
+    .poll(() => errors.some((text) => text.includes('Simulated superseded failure')))
+    .toBe(true);
+});
+
+test('a run started by a dismissal holds the running flag until it ends', async ({ page }) => {
+  await gotoPainted(page, PAGE);
+  // Open the tip of a result that can be dismissed.
+  await page.evaluate(() => {
+    const host = [...document.querySelectorAll('ed11y-element-result')].find(
+      (candidate) => candidate.result?.type === 'warning',
+    );
+    host.setAttribute('data-ed11y-action', 'open');
+  });
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('ed11y-element-tip')].some((tip) =>
+      tip.shadowRoot?.querySelector('button.dismiss.ignore'),
+    ),
+  );
+  const runningAfterDismiss = await page.evaluate(() => {
+    const tip = [...document.querySelectorAll('ed11y-element-tip')].find((candidate) =>
+      candidate.shadowRoot?.querySelector('button.dismiss.ignore'),
+    );
+    tip.shadowRoot.querySelector('button.dismiss.ignore').click();
+    // The recheck is still painting: the flag that keeps other runs out must be up.
+    return Ed11y.UI.running;
+  });
+  expect(runningAfterDismiss).toBe(true);
+  await expect.poll(() => page.evaluate(() => Ed11y.UI.running)).toBe(false);
+});
